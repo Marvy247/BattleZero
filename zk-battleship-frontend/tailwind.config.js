@@ -1,10 +1,11 @@
-/** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
-      fontFamily: {
-        mono: ['\"IBM Plex Mono\"', '\"Fira Code\"', '\"JetBrains Mono\"', 'Consolas', 'monospace'],
+      colors: {
+        ocean: '#1e3a8a',
+        hit: '#ef4444',
+        miss: '#94a3b8',
       },
     },
   },
