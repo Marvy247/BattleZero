@@ -233,9 +233,8 @@ export default function App() {
       
       const proof = await generateRevealProof(myCommitment, flatShips, myAttacks);
       
-      // For demo: Show that this would be a real transaction
-      // In production, uncomment: const hash = await claimWin(sessionId, wallet, proof);
-      const hash = `DEMO_TX_${Date.now().toString(36)}_${Math.random().toString(36).substr(2, 9)}`;
+      // Actually submit to contract
+      const hash = await claimWin(sessionId, wallet, proof);
       setTxHash(hash);
       
       toast.dismiss();
@@ -243,26 +242,24 @@ export default function App() {
         (t) => (
           <div className="flex flex-col gap-2">
             <div className="font-bold">🎉 Victory Claimed!</div>
-            <div className="text-xs text-gray-600">
-              Demo mode - Real tx would be submitted to contract
-              <br />
-              Contract: {CONTRACT_ID.slice(0, 8)}...
+            <div className="text-xs text-gray-600 font-mono">
+              {hash.slice(0, 16)}...
             </div>
             <button
               onClick={() => {
                 toast.dismiss(t.id);
-                window.open(`https://stellar.expert/explorer/testnet/contract/${CONTRACT_ID}`, '_blank');
+                window.open(`https://stellar.expert/explorer/testnet/tx/${hash}`, '_blank');
               }}
               className="text-blue-600 hover:text-blue-800 underline text-sm text-left"
             >
-              View Contract on Explorer →
+              View Transaction on Explorer →
             </button>
           </div>
         ),
         { duration: 10000 }
       );
       
-      addLog('victory', `Victory proof generated. Contract: ${CONTRACT_ID.slice(0, 16)}...`);
+      addLog('victory', `Transaction: ${hash.slice(0, 20)}...`);
     } catch (err: any) {
       setError(err.message);
       toast.error(err.message);
@@ -485,12 +482,12 @@ export default function App() {
             </button>
             {txHash && (
               <a
-                href={`https://stellar.expert/explorer/testnet/contract/${CONTRACT_ID}`}
+                href={`https://stellar.expert/explorer/testnet/tx/${txHash}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block text-center bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition w-full mb-2"
               >
-                View Contract on Explorer →
+                View Transaction →
               </a>
             )}
             <button
