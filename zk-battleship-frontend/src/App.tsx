@@ -164,7 +164,7 @@ export default function App() {
       {phase === 'won' && <Confetti width={width} height={height} />}
       {generating && <ProofSpinner />}
       
-      <div className="max-w-6xl w-full">
+      <div className="relative z-10 w-full max-w-6xl">
         <h1 className="text-5xl font-bold text-white text-center mb-8">
           ⚓ ZK Battleship
         </h1>
