@@ -8,6 +8,7 @@ import OceanBackground from './components/OceanBackground';
 import ShipPlacement from './components/ShipPlacement';
 import BattleGrid from './components/BattleGrid';
 import ProofSpinner from './components/ProofSpinner';
+import BattleLog, { type LogEntry } from './components/BattleLog';
 import { connectWallet, initializeGame, submitAttack, claimWin } from './utils/stellar';
 import { generateCommitment, generateAttackProof, generateRevealProof } from './utils/noir';
 import type { Ship } from './types';
@@ -26,6 +27,20 @@ export default function App() {
   const [isMyTurn, setIsMyTurn] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState('');
+  const [battleLogs, setBattleLogs] = useState<LogEntry[]>([]);
+  const [logIdCounter, setLogIdCounter] = useState(0);
+
+  const addLog = (type: LogEntry['type'], message: string, player?: 'you' | 'opponent') => {
+    const newLog: LogEntry = {
+      id: logIdCounter,
+      timestamp: new Date(),
+      type,
+      message,
+      player,
+    };
+    setBattleLogs(prev => [...prev, newLog]);
+    setLogIdCounter(prev => prev + 1);
+  };
 
   useEffect(() => {
     // Check if Freighter is installed
@@ -79,6 +94,7 @@ export default function App() {
   const handleShipsPlaced = async (ships: Ship[]) => {
     setMyShips(ships);
     toast.loading('Generating commitment...');
+    addLog('info', 'Fleet deployed! Generating cryptographic commitment...', 'you');
     
     // Flatten ships for commitment
     const flatShips: number[] = [];
@@ -94,16 +110,22 @@ export default function App() {
     setPhase('waiting');
     toast.dismiss();
     toast.success('Ships placed! Waiting for opponent...');
+    addLog('info', `Commitment generated: ${commitment.slice(0, 16)}...`, 'you');
+    addLog('info', 'Waiting for opponent to deploy fleet...');
     
     // In production: wait for opponent, then call initializeGame
     setTimeout(() => {
       setPhase('playing');
       toast.success('Game started!');
+      addLog('info', '⚔️ Battle commenced! You have first strike.', 'you');
     }, 2000);
   };
 
   const handleAttack = async (row: number, col: number) => {
     if (!isMyTurn || generating) return;
+    
+    const coord = `${String.fromCharCode(65 + row)}${col + 1}`;
+    addLog('attack', `Firing at coordinates ${coord}...`, 'you');
     
     setGenerating(true);
     toast.loading('Generating ZK proof...');
@@ -122,33 +144,52 @@ export default function App() {
       
       const proof = await generateAttackProof(myCommitment, flatShips, row, col, hit);
       toast.dismiss();
-      toast.success(hit ? '💥 Hit!' : '💦 Miss!');
+      
+      if (hit) {
+        toast.success('💥 Hit!');
+        addLog('hit', `Direct hit at ${coord}! Enemy vessel damaged!`, 'you');
+      } else {
+        toast.success('💦 Miss!');
+        addLog('miss', `Missed at ${coord}. Shells hit water.`, 'you');
+      }
       
       // Submit to contract
       // const result = await submitAttack(sessionId, wallet, row, col, proof);
       
       setMyAttacks([...myAttacks, [row, col, hit]]);
       setIsMyTurn(false);
+      addLog('info', 'Opponent preparing counter-attack...');
       
       // Simulate opponent turn
       setTimeout(() => {
         const oppRow = Math.floor(Math.random() * 10);
         const oppCol = Math.floor(Math.random() * 10);
         const oppHit = Math.random() > 0.7;
+        const oppCoord = `${String.fromCharCode(65 + oppRow)}${oppCol + 1}`;
+        
+        if (oppHit) {
+          addLog('hit', `Enemy hit our vessel at ${oppCoord}!`, 'opponent');
+        } else {
+          addLog('miss', `Enemy missed at ${oppCoord}.`, 'opponent');
+        }
+        
         setOppAttacks([...oppAttacks, [oppRow, oppCol, oppHit]]);
         setIsMyTurn(true);
         toast.info('Your turn!');
+        addLog('info', 'Your turn to fire!', 'you');
         
         // Check win condition
         if (myAttacks.length >= 17) {
           setPhase('won');
           toast.success('🎉 Victory!');
+          addLog('victory', '🏆 ALL ENEMY VESSELS DESTROYED! VICTORY IS OURS!', 'you');
         }
       }, 3000);
       
     } catch (err: any) {
       setError(err.message);
       toast.error(err.message);
+      addLog('info', `Error: ${err.message}`);
     } finally {
       setGenerating(false);
     }
@@ -232,27 +273,31 @@ export default function App() {
         )}
         
         {phase === 'playing' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-white p-6 rounded-lg shadow-xl">
-              <h3 className="text-xl font-bold mb-4">Your Fleet</h3>
-              <BattleGrid
-                attacks={oppAttacks}
-                showShips
-                ships={myShips.flatMap(s => s.positions)}
-                disabled
-              />
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="bg-white p-6 rounded-lg shadow-xl">
+                <h3 className="text-xl font-bold mb-4">Your Fleet</h3>
+                <BattleGrid
+                  attacks={oppAttacks}
+                  showShips
+                  ships={myShips.flatMap(s => s.positions)}
+                  disabled
+                />
+              </div>
+              
+              <div className="bg-white p-6 rounded-lg shadow-xl">
+                <h3 className="text-xl font-bold mb-4">
+                  Enemy Waters {isMyTurn ? '(Your Turn)' : '(Waiting...)'}
+                </h3>
+                <BattleGrid
+                  attacks={myAttacks}
+                  onAttack={handleAttack}
+                  disabled={!isMyTurn}
+                />
+              </div>
             </div>
             
-            <div className="bg-white p-6 rounded-lg shadow-xl">
-              <h3 className="text-xl font-bold mb-4">
-                Enemy Waters {isMyTurn ? '(Your Turn)' : '(Waiting...)'}
-              </h3>
-              <BattleGrid
-                attacks={myAttacks}
-                onAttack={handleAttack}
-                disabled={!isMyTurn}
-              />
-            </div>
+            <BattleLog logs={battleLogs} />
           </div>
         )}
         
