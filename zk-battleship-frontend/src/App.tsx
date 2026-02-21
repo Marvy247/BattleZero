@@ -42,31 +42,31 @@ export default function App() {
 
   const handleConnect = async () => {
     try {
+      // Log what's available
+      console.log('window.freighterApi:', window.freighterApi);
+      console.log('isConnected function:', isConnected);
+      
       const connected = await isConnected();
       console.log('Freighter connected:', connected);
       
       if (!connected) {
-        toast.error('Please install Freighter wallet extension');
+        toast.error('Freighter wallet not detected. Please install and refresh.');
         window.open('https://www.freighter.app/', '_blank');
         return;
       }
       
-      // Request network first
-      const { network, networkPassphrase } = await window.freighterApi.getNetwork();
-      console.log('Network:', network, networkPassphrase);
-      
-      if (network !== 'TESTNET') {
-        toast.error('Please switch Freighter to TESTNET mode');
-        return;
+      // Try getting public key
+      let address = '';
+      try {
+        address = await getPublicKey();
+        console.log('getPublicKey() returned:', address, 'type:', typeof address);
+      } catch (e) {
+        console.error('getPublicKey error:', e);
       }
       
-      // Request public key with explicit permission
-      const address = await window.freighterApi.getPublicKey();
-      console.log('Got address:', address);
-      
       if (!address || address.trim() === '') {
-        toast.error('Please unlock Freighter and make sure you have an account', {
-          duration: 5000,
+        toast.error('Cannot get wallet address. Please:\n1. Unlock Freighter\n2. Create/import an account\n3. Refresh the page', {
+          duration: 8000,
         });
         return;
       }
