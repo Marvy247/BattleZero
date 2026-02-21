@@ -27,8 +27,6 @@ export default function App() {
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState('');
 
-  console.log('Current phase:', phase); // Debug log
-
   useEffect(() => {
     // Check if Freighter is installed
     isConnected().then(connected => {
@@ -43,7 +41,6 @@ export default function App() {
   const handleConnect = async () => {
     try {
       const connected = await isConnected();
-      console.log('Freighter connected:', connected);
       
       if (!connected) {
         toast.error('Freighter wallet not detected. Please install and refresh.');
@@ -51,10 +48,8 @@ export default function App() {
         return;
       }
       
-      // Request access first - this will show Freighter popup
       toast.loading('Requesting wallet access...');
       const accessObj = await requestAccess();
-      console.log('Access granted:', accessObj);
       
       if (accessObj.error) {
         toast.dismiss();
@@ -62,9 +57,7 @@ export default function App() {
         return;
       }
       
-      // Now get the public key
       const address = await getPublicKey();
-      console.log('Got address after access:', address);
       
       if (!address || address.trim() === '') {
         toast.dismiss();
@@ -77,7 +70,6 @@ export default function App() {
       setPhase('setup');
       toast.success(`Connected: ${address.slice(0, 8)}...${address.slice(-8)}`);
     } catch (err: any) {
-      console.error('Connection error:', err);
       toast.dismiss();
       setError(err.message);
       toast.error(`Connection failed: ${err.message}`);
