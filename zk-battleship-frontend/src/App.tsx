@@ -3,7 +3,7 @@ import Confetti from 'react-confetti';
 import { useWindowSize } from 'react-use';
 import { Toaster, toast } from 'react-hot-toast';
 import { motion } from 'framer-motion';
-import { isConnected, getPublicKey } from '@stellar/freighter-api';
+import { isConnected, getPublicKey, requestAccess } from '@stellar/freighter-api';
 import OceanBackground from './components/OceanBackground';
 import ShipPlacement from './components/ShipPlacement';
 import BattleGrid from './components/BattleGrid';
@@ -42,10 +42,6 @@ export default function App() {
 
   const handleConnect = async () => {
     try {
-      // Log what's available
-      console.log('window.freighterApi:', window.freighterApi);
-      console.log('isConnected function:', isConnected);
-      
       const connected = await isConnected();
       console.log('Freighter connected:', connected);
       
@@ -55,27 +51,34 @@ export default function App() {
         return;
       }
       
-      // Try getting public key
-      let address = '';
-      try {
-        address = await getPublicKey();
-        console.log('getPublicKey() returned:', address, 'type:', typeof address);
-      } catch (e) {
-        console.error('getPublicKey error:', e);
-      }
+      // Request access first - this will show Freighter popup
+      toast.loading('Requesting wallet access...');
+      const accessObj = await requestAccess();
+      console.log('Access granted:', accessObj);
       
-      if (!address || address.trim() === '') {
-        toast.error('Cannot get wallet address. Please:\n1. Unlock Freighter\n2. Create/import an account\n3. Refresh the page', {
-          duration: 8000,
-        });
+      if (accessObj.error) {
+        toast.dismiss();
+        toast.error('Access denied. Please approve the connection in Freighter.');
         return;
       }
       
+      // Now get the public key
+      const address = await getPublicKey();
+      console.log('Got address after access:', address);
+      
+      if (!address || address.trim() === '') {
+        toast.dismiss();
+        toast.error('Failed to get address. Please make sure you have an account in Freighter.');
+        return;
+      }
+      
+      toast.dismiss();
       setWallet(address);
       setPhase('setup');
       toast.success(`Connected: ${address.slice(0, 8)}...${address.slice(-8)}`);
     } catch (err: any) {
       console.error('Connection error:', err);
+      toast.dismiss();
       setError(err.message);
       toast.error(`Connection failed: ${err.message}`);
     }
