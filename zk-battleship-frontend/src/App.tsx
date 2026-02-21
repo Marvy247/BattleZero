@@ -190,7 +190,22 @@ export default function App() {
           addLog('miss', `Enemy missed at ${oppCoord}.`, 'opponent');
         }
         
-        setOppAttacks([...oppAttacks, [oppRow, oppCol, oppHit]]);
+        const newOppAttacks = [...oppAttacks, [oppRow, oppCol, oppHit]];
+        setOppAttacks(newOppAttacks);
+        
+        // Check if opponent won
+        const oppHits = newOppAttacks.filter(a => a[2]).length;
+        const requiredHits = demoMode ? 5 : 17;
+        
+        if (oppHits >= requiredHits) {
+          setTimeout(() => {
+            setPhase('lost');
+            toast.error('💀 Defeat!');
+            addLog('info', '💀 Enemy destroyed our fleet! We have been defeated.', 'opponent');
+          }, 500);
+          return;
+        }
+        
         setIsMyTurn(true);
         toast.info('Your turn!');
         addLog('info', 'Your turn to fire!', 'you');
@@ -431,6 +446,42 @@ export default function App() {
               className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition w-full"
             >
               Play Again
+            </button>
+          </motion.div>
+        )}
+        
+        {phase === 'lost' && (
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className="bg-white/95 backdrop-blur-sm p-8 rounded-lg shadow-2xl text-center max-w-md mx-auto mt-20"
+          >
+            <div className="text-6xl mb-4">💀</div>
+            <h2 className="text-3xl font-bold mb-4 text-red-600">Defeat!</h2>
+            <p className="text-gray-600 mb-6">The enemy destroyed your fleet!</p>
+            <div className="space-y-2 mb-6 text-left bg-gray-50 p-4 rounded">
+              <div className="flex justify-between">
+                <span>Your Hits:</span>
+                <span className="font-bold text-green-600">{myAttacks.filter(a => a[2]).length}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Enemy Hits:</span>
+                <span className="font-bold text-red-600">{oppAttacks.filter(a => a[2]).length}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Your Accuracy:</span>
+                <span className="font-bold text-blue-600">
+                  {myAttacks.length > 0 
+                    ? Math.round((myAttacks.filter(a => a[2]).length / myAttacks.length) * 100)
+                    : 0}%
+                </span>
+              </div>
+            </div>
+            <button
+              onClick={() => window.location.reload()}
+              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition w-full"
+            >
+              Try Again
             </button>
           </motion.div>
         )}
