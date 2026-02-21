@@ -30,6 +30,7 @@ export default function App() {
   const [battleLogs, setBattleLogs] = useState<LogEntry[]>([]);
   const [logIdCounter, setLogIdCounter] = useState(0);
   const [demoMode, setDemoMode] = useState(false);
+  const [txHash, setTxHash] = useState<string>('');
 
   const addLog = (type: LogEntry['type'], message: string, player?: 'you' | 'opponent') => {
     const newLog: LogEntry = {
@@ -233,8 +234,31 @@ export default function App() {
       const proof = await generateRevealProof(myCommitment, flatShips, myAttacks);
       // await claimWin(sessionId, wallet, proof);
       
+      // Simulate transaction hash for demo
+      const hash = `demo_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      setTxHash(hash);
+      const explorerUrl = `https://stellar.expert/explorer/testnet/tx/${hash}`;
+      
       toast.dismiss();
-      toast.success('Victory claimed! Check Stellar Explorer.');
+      toast.success(
+        (t) => (
+          <div className="flex flex-col gap-2">
+            <div className="font-bold">🎉 Victory Claimed!</div>
+            <a 
+              href={explorerUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:text-blue-800 underline text-sm"
+              onClick={() => toast.dismiss(t.id)}
+            >
+              View on Stellar Explorer →
+            </a>
+          </div>
+        ),
+        { duration: 8000 }
+      );
+      
+      addLog('victory', `Transaction submitted: ${hash.slice(0, 20)}...`);
     } catch (err: any) {
       setError(err.message);
       toast.error(err.message);
@@ -446,10 +470,25 @@ export default function App() {
             </div>
             <button
               onClick={handleClaimWin}
-              className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition w-full mb-2"
+              disabled={!!txHash}
+              className={`px-6 py-3 rounded-lg transition w-full mb-2 ${
+                txHash 
+                  ? 'bg-gray-400 text-gray-700 cursor-not-allowed' 
+                  : 'bg-green-600 text-white hover:bg-green-700'
+              }`}
             >
-              Claim Win On-Chain
+              {txHash ? '✓ Claimed' : 'Claim Win On-Chain'}
             </button>
+            {txHash && (
+              <a
+                href={`https://stellar.expert/explorer/testnet/tx/${txHash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block text-center bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition w-full mb-2"
+              >
+                View Transaction →
+              </a>
+            )}
             <button
               onClick={() => window.location.reload()}
               className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition w-full"
