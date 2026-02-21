@@ -159,9 +159,23 @@ export default function App() {
       // Submit to contract
       // const result = await submitAttack(sessionId, wallet, row, col, proof);
       
-      setMyAttacks([...myAttacks, [row, col, hit]]);
+      const newMyAttacks = [...myAttacks, [row, col, hit]];
+      setMyAttacks(newMyAttacks);
       setIsMyTurn(false);
       addLog('info', 'Opponent preparing counter-attack...');
+      
+      // Check win condition immediately after our attack
+      const totalHits = newMyAttacks.filter(a => a[2]).length;
+      const requiredHits = demoMode ? 5 : 17;
+      
+      if (totalHits >= requiredHits) {
+        setTimeout(() => {
+          setPhase('won');
+          toast.success('🎉 Victory!');
+          addLog('victory', '🏆 ALL ENEMY VESSELS DESTROYED! VICTORY IS OURS!', 'you');
+        }, 500);
+        return;
+      }
       
       // Simulate opponent turn
       setTimeout(() => {
@@ -180,15 +194,6 @@ export default function App() {
         setIsMyTurn(true);
         toast.info('Your turn!');
         addLog('info', 'Your turn to fire!', 'you');
-        
-        // Check win condition - count actual hits
-        const totalHits = myAttacks.filter(a => a[2]).length;
-        const requiredHits = demoMode ? 5 : 17;
-        if (totalHits >= requiredHits) {
-          setPhase('won');
-          toast.success('🎉 Victory!');
-          addLog('victory', '🏆 ALL ENEMY VESSELS DESTROYED! VICTORY IS OURS!', 'you');
-        }
       }, demoMode ? 1000 : 3000);
       
     } catch (err: any) {
