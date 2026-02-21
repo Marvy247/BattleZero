@@ -9,7 +9,7 @@ import ShipPlacement from './components/ShipPlacement';
 import BattleGrid from './components/BattleGrid';
 import ProofSpinner from './components/ProofSpinner';
 import BattleLog, { type LogEntry } from './components/BattleLog';
-import { connectWallet, initializeGame, submitAttack, claimWin } from './utils/stellar';
+import { connectWallet, initializeGame, submitAttack, claimWin, CONTRACT_ID } from './utils/stellar';
 import { generateCommitment, generateAttackProof, generateRevealProof } from './utils/noir';
 import type { Ship } from './types';
 
@@ -232,33 +232,37 @@ export default function App() {
       });
       
       const proof = await generateRevealProof(myCommitment, flatShips, myAttacks);
-      // await claimWin(sessionId, wallet, proof);
       
-      // Simulate transaction hash for demo
-      const hash = `demo_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      // For demo: Show that this would be a real transaction
+      // In production, uncomment: const hash = await claimWin(sessionId, wallet, proof);
+      const hash = `DEMO_TX_${Date.now().toString(36)}_${Math.random().toString(36).substr(2, 9)}`;
       setTxHash(hash);
-      const explorerUrl = `https://stellar.expert/explorer/testnet/tx/${hash}`;
       
       toast.dismiss();
       toast.success(
         (t) => (
           <div className="flex flex-col gap-2">
             <div className="font-bold">🎉 Victory Claimed!</div>
-            <a 
-              href={explorerUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:text-blue-800 underline text-sm"
-              onClick={() => toast.dismiss(t.id)}
+            <div className="text-xs text-gray-600">
+              Demo mode - Real tx would be submitted to contract
+              <br />
+              Contract: {CONTRACT_ID.slice(0, 8)}...
+            </div>
+            <button
+              onClick={() => {
+                toast.dismiss(t.id);
+                window.open(`https://stellar.expert/explorer/testnet/contract/${CONTRACT_ID}`, '_blank');
+              }}
+              className="text-blue-600 hover:text-blue-800 underline text-sm text-left"
             >
-              View on Stellar Explorer →
-            </a>
+              View Contract on Explorer →
+            </button>
           </div>
         ),
-        { duration: 8000 }
+        { duration: 10000 }
       );
       
-      addLog('victory', `Transaction submitted: ${hash.slice(0, 20)}...`);
+      addLog('victory', `Victory proof generated. Contract: ${CONTRACT_ID.slice(0, 16)}...`);
     } catch (err: any) {
       setError(err.message);
       toast.error(err.message);
@@ -481,12 +485,12 @@ export default function App() {
             </button>
             {txHash && (
               <a
-                href={`https://stellar.expert/explorer/testnet/tx/${txHash}`}
+                href={`https://stellar.expert/explorer/testnet/contract/${CONTRACT_ID}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block text-center bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition w-full mb-2"
               >
-                View Transaction →
+                View Contract on Explorer →
               </a>
             )}
             <button
