@@ -11,26 +11,16 @@ fn main(
     let computed = std::hash::poseidon2::Poseidon2::hash(ships, 17);
     assert(computed == commitment);
     
-    // Ships: [ship1_len, ship1_cells..., ship2_len, ship2_cells..., ...]
-    let attack_pos = attack_row as Field * 10 + attack_col as Field;
+    // Check if attack hits any ship cell
     let mut found_hit = false;
     
-    // Check if attack hits any ship cell
-    let mut idx = 0;
-    for _ in 0..5 {
-        if idx >= 17 { break; }
-        let ship_len = ships[idx] as u8;
-        idx += 1;
-        
-        for _ in 0..ship_len {
-            if idx >= 17 { break; }
-            let cell_row = ships[idx] as u8;
-            idx += 1;
-            if idx >= 17 { break; }
-            let cell_col = ships[idx] as u8;
-            idx += 1;
-            
-            if (cell_row == attack_row) & (cell_col == attack_col) {
+    // Iterate through ship data (fixed iterations for constraints)
+    for i in 0..17 {
+        let val = ships[i] as u8;
+        // Check if this is a coordinate that matches attack
+        if (i % 2 == 1) & (i > 0) {
+            let prev_val = ships[i - 1] as u8;
+            if (prev_val == attack_row) & (val == attack_col) {
                 found_hit = true;
             }
         }
