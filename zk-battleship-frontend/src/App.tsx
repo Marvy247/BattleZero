@@ -54,8 +54,10 @@ export default function App() {
       const address = await getPublicKey();
       console.log('Got address:', address);
       
-      if (!address) {
-        toast.error('Failed to get wallet address. Please unlock Freighter.');
+      if (!address || address.trim() === '') {
+        toast.error('Please unlock Freighter and make sure you have an account', {
+          duration: 5000,
+        });
         return;
       }
       
