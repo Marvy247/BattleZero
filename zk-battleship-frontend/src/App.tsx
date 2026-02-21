@@ -29,6 +29,7 @@ export default function App() {
   const [error, setError] = useState('');
   const [battleLogs, setBattleLogs] = useState<LogEntry[]>([]);
   const [logIdCounter, setLogIdCounter] = useState(0);
+  const [demoMode, setDemoMode] = useState(false);
 
   const addLog = (type: LogEntry['type'], message: string, player?: 'you' | 'opponent') => {
     const newLog: LogEntry = {
@@ -117,8 +118,10 @@ export default function App() {
     setTimeout(() => {
       setPhase('playing');
       toast.success('Game started!');
-      addLog('info', '⚔️ Battle commenced! You have first strike.', 'you');
-    }, 2000);
+      addLog('info', demoMode 
+        ? '⚡ Quick demo mode - First to 5 hits wins!' 
+        : '⚔️ Battle commenced! You have first strike.', 'you');
+    }, demoMode ? 500 : 2000);
   };
 
   const handleAttack = async (row: number, col: number) => {
@@ -178,13 +181,14 @@ export default function App() {
         toast.info('Your turn!');
         addLog('info', 'Your turn to fire!', 'you');
         
-        // Check win condition
-        if (myAttacks.length >= 17) {
+        // Check win condition - reduced for demo mode
+        const requiredHits = demoMode ? 5 : 17;
+        if (myAttacks.length >= requiredHits) {
           setPhase('won');
           toast.success('🎉 Victory!');
           addLog('victory', '🏆 ALL ENEMY VESSELS DESTROYED! VICTORY IS OURS!', 'you');
         }
-      }, 3000);
+      }, demoMode ? 1000 : 3000);
       
     } catch (err: any) {
       setError(err.message);
@@ -246,6 +250,19 @@ export default function App() {
                       {wallet.slice(0, 6)}...{wallet.slice(-4)}
                     </span>
                   </div>
+                  
+                  {phase === 'placement' && (
+                    <button
+                      onClick={() => setDemoMode(!demoMode)}
+                      className={`px-4 py-2 rounded-lg text-sm font-bold transition ${
+                        demoMode 
+                          ? 'bg-yellow-500 text-black' 
+                          : 'bg-gray-700 text-white hover:bg-gray-600'
+                      }`}
+                    >
+                      {demoMode ? '⚡ Quick Demo' : '🎮 Full Game'}
+                    </button>
+                  )}
                   
                   {phase === 'playing' && (
                     <div className="flex items-center gap-4">
@@ -314,7 +331,7 @@ export default function App() {
         )}
         
         {phase === 'setup' && (
-          <ShipPlacement onComplete={handleShipsPlaced} />
+          <ShipPlacement onComplete={handleShipsPlaced} demoMode={demoMode} />
         )}
         
         {phase === 'waiting' && (

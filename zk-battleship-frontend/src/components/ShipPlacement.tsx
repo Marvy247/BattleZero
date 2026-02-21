@@ -8,11 +8,14 @@ interface Ship {
 
 interface Props {
   onComplete: (ships: Ship[]) => void;
+  demoMode?: boolean;
 }
 
 const SHIP_LENGTHS = [5, 4, 3, 3, 2];
+const DEMO_SHIP_LENGTHS = [3, 2]; // Quick demo: just 2 ships
 
-export default function ShipPlacement({ onComplete }: Props) {
+export default function ShipPlacement({ onComplete, demoMode = false }: Props) {
+  const shipLengths = demoMode ? DEMO_SHIP_LENGTHS : SHIP_LENGTHS;
   const [grid, setGrid] = useState<number[][]>(Array(10).fill(0).map(() => Array(10).fill(0)));
   const [ships, setShips] = useState<Ship[]>([]);
   const [currentShip, setCurrentShip] = useState(0);
@@ -32,9 +35,9 @@ export default function ShipPlacement({ onComplete }: Props) {
   };
 
   const placeShip = (row: number, col: number) => {
-    if (currentShip >= SHIP_LENGTHS.length) return;
+    if (currentShip >= shipLengths.length) return;
     
-    const length = SHIP_LENGTHS[currentShip];
+    const length = shipLengths[currentShip];
     if (!canPlace(row, col, length, horizontal)) return;
 
     const positions: [number, number][] = [];
@@ -52,14 +55,14 @@ export default function ShipPlacement({ onComplete }: Props) {
     setShips(newShips);
     setCurrentShip(currentShip + 1);
 
-    if (currentShip + 1 === SHIP_LENGTHS.length) {
+    if (currentShip + 1 === shipLengths.length) {
       setTimeout(() => onComplete(newShips), 500);
     }
   };
 
   const getPreview = (row: number, col: number): [number, number][] => {
-    if (currentShip >= SHIP_LENGTHS.length) return [];
-    const length = SHIP_LENGTHS[currentShip];
+    if (currentShip >= shipLengths.length) return [];
+    const length = shipLengths[currentShip];
     if (!canPlace(row, col, length, horizontal)) return [];
 
     const preview: [number, number][] = [];
@@ -74,12 +77,12 @@ export default function ShipPlacement({ onComplete }: Props) {
   return (
     <div className="flex flex-col items-center gap-4 p-8 bg-white rounded-lg shadow-xl">
       <h2 className="text-2xl font-bold text-gray-800">
-        {currentShip < SHIP_LENGTHS.length 
-          ? `Place Ship ${currentShip + 1} (Length: ${SHIP_LENGTHS[currentShip]})`
+        {currentShip < shipLengths.length 
+          ? `Place Ship ${currentShip + 1} (Length: ${shipLengths[currentShip]})${demoMode ? ' ⚡' : ''}`
           : 'All Ships Placed!'}
       </h2>
       
-      {currentShip < SHIP_LENGTHS.length && (
+      {currentShip < shipLengths.length && (
         <button
           onClick={() => setHorizontal(!horizontal)}
           className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
