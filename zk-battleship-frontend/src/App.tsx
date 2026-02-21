@@ -26,6 +26,8 @@ export default function App() {
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState('');
 
+  console.log('Current phase:', phase); // Debug log
+
   useEffect(() => {
     // Check if Freighter is installed
     isConnected().then(connected => {
@@ -179,7 +181,7 @@ export default function App() {
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white p-8 rounded-lg shadow-2xl text-center max-w-md"
+            className="bg-white p-8 rounded-lg shadow-2xl text-center max-w-md mx-auto"
           >
             <div className="mb-6">
               <div className="text-6xl mb-4">⚓</div>
