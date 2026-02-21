@@ -181,9 +181,10 @@ export default function App() {
         toast.info('Your turn!');
         addLog('info', 'Your turn to fire!', 'you');
         
-        // Check win condition - reduced for demo mode
+        // Check win condition - count actual hits
+        const totalHits = myAttacks.filter(a => a[2]).length;
         const requiredHits = demoMode ? 5 : 17;
-        if (myAttacks.length >= requiredHits) {
+        if (totalHits >= requiredHits) {
           setPhase('won');
           toast.success('🎉 Victory!');
           addLog('victory', '🏆 ALL ENEMY VESSELS DESTROYED! VICTORY IS OURS!', 'you');
