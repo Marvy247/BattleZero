@@ -43,6 +43,8 @@ export default function App() {
   const handleConnect = async () => {
     try {
       const connected = await isConnected();
+      console.log('Freighter connected:', connected);
+      
       if (!connected) {
         toast.error('Please install Freighter wallet extension');
         window.open('https://www.freighter.app/', '_blank');
@@ -50,10 +52,18 @@ export default function App() {
       }
       
       const address = await getPublicKey();
+      console.log('Got address:', address);
+      
+      if (!address) {
+        toast.error('Failed to get wallet address. Please unlock Freighter.');
+        return;
+      }
+      
       setWallet(address);
       setPhase('setup');
       toast.success(`Connected: ${address.slice(0, 8)}...${address.slice(-8)}`);
     } catch (err: any) {
+      console.error('Connection error:', err);
       setError(err.message);
       toast.error(`Connection failed: ${err.message}`);
     }
