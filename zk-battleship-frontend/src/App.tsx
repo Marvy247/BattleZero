@@ -257,8 +257,17 @@ export default function App() {
             <div className="flex items-center gap-3">
               <span className="text-4xl">⚓</span>
               <div>
-                <h1 className="text-2xl font-bold text-white">ZK Battleship</h1>
-                <p className="text-xs text-blue-200">Zero-Knowledge Naval Warfare</p>
+                <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+                  ZK Battleship
+                  {demoMode && (
+                    <span className="text-sm bg-yellow-500 text-black px-2 py-1 rounded font-bold animate-pulse">
+                      ⚡ DEMO MODE
+                    </span>
+                  )}
+                </h1>
+                <p className="text-xs text-blue-200">
+                  {demoMode ? 'Quick Demo - First to 3 hits!' : 'Zero-Knowledge Naval Warfare'}
+                </p>
               </div>
             </div>
             
@@ -277,11 +286,11 @@ export default function App() {
                       onClick={() => setDemoMode(!demoMode)}
                       className={`px-4 py-2 rounded-lg text-sm font-bold transition ${
                         demoMode 
-                          ? 'bg-yellow-500 text-black' 
+                          ? 'bg-yellow-500 text-black animate-pulse' 
                           : 'bg-gray-700 text-white hover:bg-gray-600'
                       }`}
                     >
-                      {demoMode ? '⚡ Quick Demo' : '🎮 Full Game'}
+                      {demoMode ? '⚡ Quick Demo ON' : '🎮 Full Game'}
                     </button>
                   )}
                   
