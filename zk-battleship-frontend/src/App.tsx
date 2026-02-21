@@ -281,7 +281,7 @@ export default function App() {
                     </span>
                   </div>
                   
-                  {phase === 'placement' && (
+                  {(phase === 'setup' || phase === 'placement') && (
                     <button
                       onClick={() => setDemoMode(!demoMode)}
                       className={`px-4 py-2 rounded-lg text-sm font-bold transition ${
