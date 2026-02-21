@@ -219,16 +219,68 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 relative">
+    <div className="h-screen flex flex-col overflow-hidden relative">
       <OceanBackground />
       <Toaster position="top-right" />
       {phase === 'won' && <Confetti width={width} height={height} />}
       {generating && <ProofSpinner />}
       
-      <div className="relative z-10 w-full max-w-6xl">
-        <h1 className="text-5xl font-bold text-white text-center mb-8">
-          ⚓ ZK Battleship
-        </h1>
+      {/* Header */}
+      <header className="relative z-10 bg-gradient-to-r from-blue-900/90 to-blue-800/90 backdrop-blur-sm border-b-2 border-blue-400 shadow-lg">
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="text-4xl">⚓</span>
+              <div>
+                <h1 className="text-2xl font-bold text-white">ZK Battleship</h1>
+                <p className="text-xs text-blue-200">Zero-Knowledge Naval Warfare</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-6">
+              {wallet && (
+                <>
+                  <div className="hidden sm:flex items-center gap-2 bg-blue-950/50 px-3 py-2 rounded-lg">
+                    <span className="text-green-400">●</span>
+                    <span className="text-white text-sm font-mono">
+                      {wallet.slice(0, 6)}...{wallet.slice(-4)}
+                    </span>
+                  </div>
+                  
+                  {phase === 'playing' && (
+                    <div className="flex items-center gap-4">
+                      <div className="text-center">
+                        <div className="text-xs text-blue-200">Accuracy</div>
+                        <div className="text-lg font-bold text-white">
+                          {myAttacks.length > 0 
+                            ? Math.round((myAttacks.filter(a => a[2]).length / myAttacks.length) * 100)
+                            : 0}%
+                        </div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-xs text-blue-200">Hits</div>
+                        <div className="text-lg font-bold text-green-400">
+                          {myAttacks.filter(a => a[2]).length}
+                        </div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-xs text-blue-200">Misses</div>
+                        <div className="text-lg font-bold text-gray-400">
+                          {myAttacks.filter(a => !a[2]).length}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </header>
+      
+      {/* Main Content */}
+      <div className="relative z-10 flex-1 overflow-hidden">
+        <div className="container mx-auto px-4 h-full py-4">
         
         {error && (
           <div className="bg-red-500 text-white p-4 rounded mb-4">
@@ -240,7 +292,7 @@ export default function App() {
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white p-8 rounded-lg shadow-2xl text-center max-w-md mx-auto"
+            className="bg-white p-8 rounded-lg shadow-2xl text-center max-w-md mx-auto mt-20"
           >
             <div className="mb-6">
               <div className="text-6xl mb-4">⚓</div>
@@ -273,52 +325,94 @@ export default function App() {
         )}
         
         {phase === 'playing' && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="bg-white p-6 rounded-lg shadow-xl">
-                <h3 className="text-xl font-bold mb-4">Your Fleet</h3>
-                <BattleGrid
-                  attacks={oppAttacks}
-                  showShips
-                  ships={myShips.flatMap(s => s.positions)}
-                  disabled
-                />
+          <div className="h-full flex flex-col lg:flex-row gap-4">
+            {/* Grids Section */}
+            <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 min-h-0">
+              <div className="bg-white/95 backdrop-blur-sm p-4 rounded-lg shadow-xl flex flex-col">
+                <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
+                  <span className="text-blue-600">🛡️</span> Your Fleet
+                </h3>
+                <div className="flex-1 flex items-center justify-center">
+                  <BattleGrid
+                    attacks={oppAttacks}
+                    showShips
+                    ships={myShips.flatMap(s => s.positions)}
+                    disabled
+                  />
+                </div>
               </div>
               
-              <div className="bg-white p-6 rounded-lg shadow-xl">
-                <h3 className="text-xl font-bold mb-4">
-                  Enemy Waters {isMyTurn ? '(Your Turn)' : '(Waiting...)'}
+              <div className="bg-white/95 backdrop-blur-sm p-4 rounded-lg shadow-xl flex flex-col">
+                <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
+                  <span className="text-red-600">🎯</span> Enemy Waters
+                  {isMyTurn ? (
+                    <span className="ml-auto text-sm bg-green-500 text-white px-3 py-1 rounded-full animate-pulse">
+                      Your Turn
+                    </span>
+                  ) : (
+                    <span className="ml-auto text-sm bg-gray-500 text-white px-3 py-1 rounded-full">
+                      Waiting...
+                    </span>
+                  )}
                 </h3>
-                <BattleGrid
-                  attacks={myAttacks}
-                  onAttack={handleAttack}
-                  disabled={!isMyTurn}
-                />
+                <div className="flex-1 flex items-center justify-center">
+                  <BattleGrid
+                    attacks={myAttacks}
+                    onAttack={handleAttack}
+                    disabled={!isMyTurn}
+                  />
+                </div>
               </div>
             </div>
             
-            <BattleLog logs={battleLogs} />
+            {/* Battle Log Section */}
+            <div className="lg:w-96 min-h-0">
+              <BattleLog logs={battleLogs} />
+            </div>
           </div>
         )}
         
         {phase === 'won' && (
-          <div className="bg-white p-8 rounded-lg shadow-xl text-center">
-            <h2 className="text-4xl font-bold text-green-600 mb-4">🎉 Victory!</h2>
-            <p className="text-xl mb-6">You sunk all enemy ships!</p>
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className="bg-white/95 backdrop-blur-sm p-8 rounded-lg shadow-2xl text-center max-w-md mx-auto mt-20"
+          >
+            <div className="text-6xl mb-4">🏆</div>
+            <h2 className="text-3xl font-bold mb-4 text-yellow-600">Victory!</h2>
+            <p className="text-gray-600 mb-6">You've destroyed the enemy fleet!</p>
+            <div className="space-y-2 mb-6 text-left bg-gray-50 p-4 rounded">
+              <div className="flex justify-between">
+                <span>Total Shots:</span>
+                <span className="font-bold">{myAttacks.length}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Hits:</span>
+                <span className="font-bold text-green-600">{myAttacks.filter(a => a[2]).length}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Accuracy:</span>
+                <span className="font-bold text-blue-600">
+                  {Math.round((myAttacks.filter(a => a[2]).length / myAttacks.length) * 100)}%
+                </span>
+              </div>
+            </div>
             <button
               onClick={handleClaimWin}
-              className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+              className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition w-full mb-2"
             >
               Claim Win On-Chain
             </button>
-          </div>
+            <button
+              onClick={() => window.location.reload()}
+              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition w-full"
+            >
+              Play Again
+            </button>
+          </motion.div>
         )}
         
-        {wallet && (
-          <div className="mt-4 text-center text-white text-sm">
-            Connected: {wallet.slice(0, 8)}...{wallet.slice(-8)}
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );

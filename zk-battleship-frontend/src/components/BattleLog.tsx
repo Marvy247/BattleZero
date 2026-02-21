@@ -39,13 +39,13 @@ export default function BattleLog({ logs }: Props) {
   }, [logs]);
 
   return (
-    <div className="bg-gray-900 rounded-lg p-4 h-96 overflow-y-auto shadow-2xl border border-gray-700">
-      <div className="flex items-center gap-2 mb-4 pb-2 border-b border-gray-700">
+    <div className="bg-gray-900 rounded-lg p-4 h-full flex flex-col shadow-2xl border border-gray-700">
+      <div className="flex items-center gap-2 mb-4 pb-2 border-b border-gray-700 flex-shrink-0">
         <span className="text-2xl">📜</span>
         <h3 className="text-xl font-bold text-white">Battle Log</h3>
       </div>
 
-      <div className="space-y-2">
+      <div className="flex-1 overflow-y-auto space-y-2 pr-2 scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-gray-800">
         <AnimatePresence initial={false}>
           {logs.map((log) => (
             <motion.div
