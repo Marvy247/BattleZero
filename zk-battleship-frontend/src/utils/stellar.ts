@@ -25,6 +25,10 @@ export async function initializeGame(
   
   const contract = new StellarSdk.Contract(CONTRACT_ID);
   
+  // Convert hex string to Uint8Array
+  const commit1Bytes = new Uint8Array(commit1.match(/.{1,2}/g)!.map(byte => parseInt(byte, 16))).slice(0, 32);
+  const commit2Bytes = new Uint8Array(commit2.match(/.{1,2}/g)!.map(byte => parseInt(byte, 16))).slice(0, 32);
+  
   const tx = new StellarSdk.TransactionBuilder(sourceAccount, {
     fee: '100000',
     networkPassphrase: NETWORK_PASSPHRASE,
@@ -35,8 +39,8 @@ export async function initializeGame(
         StellarSdk.nativeToScVal(sessionId, { type: 'u32' }),
         new StellarSdk.Address(player1).toScVal(),
         new StellarSdk.Address(player2).toScVal(),
-        StellarSdk.xdr.ScVal.scvBytes(Buffer.from(commit1, 'hex').slice(0, 32)),
-        StellarSdk.xdr.ScVal.scvBytes(Buffer.from(commit2, 'hex').slice(0, 32))
+        StellarSdk.xdr.ScVal.scvBytes(commit1Bytes),
+        StellarSdk.xdr.ScVal.scvBytes(commit2Bytes)
       )
     )
     .setTimeout(300)
@@ -73,7 +77,7 @@ export async function submitAttack(
         StellarSdk.nativeToScVal(sessionId, { type: 'u32' }),
         StellarSdk.nativeToScVal(row, { type: 'u8' }),
         StellarSdk.nativeToScVal(col, { type: 'u8' }),
-        StellarSdk.xdr.ScVal.scvBytes(Buffer.from(proof))
+        StellarSdk.xdr.ScVal.scvBytes(proof)
       )
     )
     .setTimeout(300)
@@ -117,7 +121,7 @@ export async function claimWin(
       contract.call(
         'claim_win',
         StellarSdk.nativeToScVal(sessionId, { type: 'u32' }),
-        StellarSdk.xdr.ScVal.scvBytes(Buffer.from(revealProof))
+        StellarSdk.xdr.ScVal.scvBytes(revealProof)
       )
     )
     .setTimeout(300)
