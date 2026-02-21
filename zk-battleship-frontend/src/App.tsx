@@ -51,7 +51,17 @@ export default function App() {
         return;
       }
       
-      const address = await getPublicKey();
+      // Request network first
+      const { network, networkPassphrase } = await window.freighterApi.getNetwork();
+      console.log('Network:', network, networkPassphrase);
+      
+      if (network !== 'TESTNET') {
+        toast.error('Please switch Freighter to TESTNET mode');
+        return;
+      }
+      
+      // Request public key with explicit permission
+      const address = await window.freighterApi.getPublicKey();
       console.log('Got address:', address);
       
       if (!address || address.trim() === '') {
