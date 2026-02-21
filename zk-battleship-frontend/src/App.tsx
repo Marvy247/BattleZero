@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Confetti from 'react-confetti';
 import { useWindowSize } from 'react-use';
+import { Toaster, toast } from 'react-hot-toast';
+import OceanBackground from './components/OceanBackground';
 import ShipPlacement from './components/ShipPlacement';
 import BattleGrid from './components/BattleGrid';
 import ProofSpinner from './components/ProofSpinner';
@@ -28,13 +30,16 @@ export default function App() {
       const address = await connectWallet();
       setWallet(address);
       setPhase('setup');
+      toast.success('Wallet connected!');
     } catch (err: any) {
       setError(err.message);
+      toast.error(err.message);
     }
   };
 
   const handleShipsPlaced = async (ships: Ship[]) => {
     setMyShips(ships);
+    toast.loading('Generating commitment...');
     
     // Flatten ships for commitment
     const flatShips: number[] = [];
@@ -48,10 +53,13 @@ export default function App() {
     const commitment = await generateCommitment(flatShips);
     setMyCommitment(commitment);
     setPhase('waiting');
+    toast.dismiss();
+    toast.success('Ships placed! Waiting for opponent...');
     
     // In production: wait for opponent, then call initializeGame
     setTimeout(() => {
       setPhase('playing');
+      toast.success('Game started!');
     }, 2000);
   };
 
@@ -59,6 +67,7 @@ export default function App() {
     if (!isMyTurn || generating) return;
     
     setGenerating(true);
+    toast.loading('Generating ZK proof...');
     try {
       // Check if hit
       const hit = myShips.some(ship => 
@@ -73,6 +82,8 @@ export default function App() {
       });
       
       const proof = await generateAttackProof(myCommitment, flatShips, row, col, hit);
+      toast.dismiss();
+      toast.success(hit ? '💥 Hit!' : '💦 Miss!');
       
       // Submit to contract
       // const result = await submitAttack(sessionId, wallet, row, col, proof);
@@ -87,15 +98,18 @@ export default function App() {
         const oppHit = Math.random() > 0.7;
         setOppAttacks([...oppAttacks, [oppRow, oppCol, oppHit]]);
         setIsMyTurn(true);
+        toast.info('Your turn!');
         
         // Check win condition
         if (myAttacks.length >= 17) {
           setPhase('won');
+          toast.success('🎉 Victory!');
         }
       }, 3000);
       
     } catch (err: any) {
       setError(err.message);
+      toast.error(err.message);
     } finally {
       setGenerating(false);
     }
@@ -103,6 +117,7 @@ export default function App() {
 
   const handleClaimWin = async () => {
     setGenerating(true);
+    toast.loading('Claiming victory on-chain...');
     try {
       const flatShips: number[] = [];
       myShips.forEach(ship => {
@@ -113,16 +128,20 @@ export default function App() {
       const proof = await generateRevealProof(myCommitment, flatShips, myAttacks);
       // await claimWin(sessionId, wallet, proof);
       
-      alert('Victory claimed! Check Stellar Explorer for transaction.');
+      toast.dismiss();
+      toast.success('Victory claimed! Check Stellar Explorer.');
     } catch (err: any) {
       setError(err.message);
+      toast.error(err.message);
     } finally {
       setGenerating(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 relative">
+      <OceanBackground />
+      <Toaster position="top-right" />
       {phase === 'won' && <Confetti width={width} height={height} />}
       {generating && <ProofSpinner />}
       
