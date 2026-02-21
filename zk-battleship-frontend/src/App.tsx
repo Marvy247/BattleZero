@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Confetti from 'react-confetti';
 import { useWindowSize } from 'react-use';
 import { Toaster, toast } from 'react-hot-toast';
+import { isConnected, getPublicKey } from '@stellar/freighter-api';
 import OceanBackground from './components/OceanBackground';
 import ShipPlacement from './components/ShipPlacement';
 import BattleGrid from './components/BattleGrid';
@@ -25,15 +26,33 @@ export default function App() {
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState('');
 
+  useEffect(() => {
+    // Check if Freighter is installed
+    isConnected().then(connected => {
+      if (!connected) {
+        toast.error('Freighter wallet not detected. Please install it.', {
+          duration: 5000,
+        });
+      }
+    });
+  }, []);
+
   const handleConnect = async () => {
     try {
-      const address = await connectWallet();
+      const connected = await isConnected();
+      if (!connected) {
+        toast.error('Please install Freighter wallet extension');
+        window.open('https://www.freighter.app/', '_blank');
+        return;
+      }
+      
+      const address = await getPublicKey();
       setWallet(address);
       setPhase('setup');
-      toast.success('Wallet connected!');
+      toast.success(`Connected: ${address.slice(0, 8)}...${address.slice(-8)}`);
     } catch (err: any) {
       setError(err.message);
-      toast.error(err.message);
+      toast.error(`Connection failed: ${err.message}`);
     }
   };
 
@@ -157,15 +176,28 @@ export default function App() {
         )}
         
         {phase === 'connect' && (
-          <div className="bg-white p-8 rounded-lg shadow-xl text-center">
-            <h2 className="text-2xl mb-4">Connect Your Wallet</h2>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white p-8 rounded-lg shadow-2xl text-center max-w-md"
+          >
+            <div className="mb-6">
+              <div className="text-6xl mb-4">⚓</div>
+              <h2 className="text-3xl font-bold text-gray-800 mb-2">ZK Battleship</h2>
+              <p className="text-gray-600">Privacy-preserving naval warfare on Stellar</p>
+            </div>
+            
             <button
               onClick={handleConnect}
-              className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+              className="w-full px-6 py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all transform hover:scale-105 shadow-lg font-semibold text-lg"
             >
-              Connect Freighter
+              🔗 Connect Freighter Wallet
             </button>
-          </div>
+            
+            <p className="mt-4 text-sm text-gray-500">
+              Make sure Freighter is installed and set to Testnet
+            </p>
+          </motion.div>
         )}
         
         {phase === 'setup' && (
