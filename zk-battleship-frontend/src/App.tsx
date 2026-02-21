@@ -119,7 +119,7 @@ export default function App() {
       setPhase('playing');
       toast.success('Game started!');
       addLog('info', demoMode 
-        ? '⚡ Quick demo mode - First to 5 hits wins!' 
+        ? '⚡ Quick demo mode - First to 3 hits wins!' 
         : '⚔️ Battle commenced! You have first strike.', 'you');
     }, demoMode ? 500 : 2000);
   };
@@ -166,7 +166,7 @@ export default function App() {
       
       // Check win condition immediately after our attack
       const totalHits = newMyAttacks.filter(a => a[2]).length;
-      const requiredHits = demoMode ? 5 : 17;
+      const requiredHits = demoMode ? 3 : 17; // Only 3 hits needed in demo!
       
       if (totalHits >= requiredHits) {
         setTimeout(() => {
@@ -181,7 +181,7 @@ export default function App() {
       setTimeout(() => {
         const oppRow = Math.floor(Math.random() * 10);
         const oppCol = Math.floor(Math.random() * 10);
-        const oppHit = Math.random() > 0.7;
+        const oppHit = demoMode ? Math.random() > 0.2 : Math.random() > 0.7; // 80% hit rate in demo
         const oppCoord = `${String.fromCharCode(65 + oppRow)}${oppCol + 1}`;
         
         if (oppHit) {
@@ -195,7 +195,7 @@ export default function App() {
         
         // Check if opponent won
         const oppHits = newOppAttacks.filter(a => a[2]).length;
-        const requiredHits = demoMode ? 5 : 17;
+        const requiredHits = demoMode ? 3 : 17; // Only 3 hits needed in demo!
         
         if (oppHits >= requiredHits) {
           setTimeout(() => {
