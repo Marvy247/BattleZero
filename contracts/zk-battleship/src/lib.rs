@@ -1,5 +1,5 @@
 #![no_std]
-use soroban_sdk::{contract, contractimpl, contracttype, contracting, Address, Bytes, BytesN, Env, Vec, vec};
+use soroban_sdk::{contract, contractclient, contractimpl, contracttype, Address, BytesN, Env, String, Vec};
 
 #[contractclient(name = "GameHubClient")]
 pub trait GameHub {
@@ -17,14 +17,22 @@ pub trait GameHub {
 
 #[contracttype]
 #[derive(Clone)]
+pub struct Attack {
+    pub row: u32,
+    pub col: u32,
+    pub hit: bool,
+}
+
+#[contracttype]
+#[derive(Clone)]
 pub struct GameState {
     pub session_id: u32,
     pub player1: Address,
     pub player2: Address,
     pub commit1: BytesN<32>,
     pub commit2: BytesN<32>,
-    pub attacks1: Vec<(u8, u8, bool)>,
-    pub attacks2: Vec<(u8, u8, bool)>,
+    pub attacks1: Vec<Attack>,
+    pub attacks2: Vec<Attack>,
     pub turn: Address,
     pub winner: Option<Address>,
 }
@@ -57,13 +65,9 @@ impl ZKBattleshipContract {
         player2: Address,
         commit1: BytesN<32>,
         commit2: BytesN<32>,
-    ) -> Result<(), u32> {
+    ) {
         player1.require_auth();
         player2.require_auth();
-
-        if env.storage().temporary().has(&DataKey::Game(session_id)) {
-            return Err(1);
-        }
 
         let game_hub: Address = env.storage().instance().get(&DataKey::GameHub).unwrap();
         let hub_client = GameHubClient::new(&env, &game_hub);
@@ -83,64 +87,49 @@ impl ZKBattleshipContract {
             player2: player2.clone(),
             commit1,
             commit2,
-            attacks1: vec![&env],
-            attacks2: vec![&env],
+            attacks1: Vec::new(&env),
+            attacks2: Vec::new(&env),
             turn: player1,
             winner: None,
         };
 
         env.storage().temporary().set(&DataKey::Game(session_id), &game);
         env.storage().temporary().extend_ttl(&DataKey::Game(session_id), LEDGERS_30_DAYS, LEDGERS_30_DAYS);
-
-        Ok(())
     }
 
     pub fn attack(
         env: Env,
         session_id: u32,
-        row: u8,
-        col: u8,
-        proof: Bytes,
-    ) -> Result<bool, u32> {
-        let mut game: GameState = env.storage().temporary().get(&DataKey::Game(session_id)).ok_or(2)?;
+        row: u32,
+        col: u32,
+        hit: bool,
+    ) -> bool {
+        let mut game: GameState = env.storage().temporary().get(&DataKey::Game(session_id)).unwrap();
         
-        if game.winner.is_some() {
-            return Err(3);
-        }
-
         game.turn.require_auth();
 
-        if proof.len() < 32 {
-            return Err(4);
-        }
-
-        let hit = proof.get(0).unwrap_or(0) > 0;
+        let attack = Attack { row, col, hit };
 
         if game.turn == game.player1 {
-            game.attacks1.push_back((row, col, hit));
+            game.attacks1.push_back(attack);
             game.turn = game.player2.clone();
         } else {
-            game.attacks2.push_back((row, col, hit));
+            game.attacks2.push_back(attack);
             game.turn = game.player1.clone();
         }
 
         env.storage().temporary().set(&DataKey::Game(session_id), &game);
         env.storage().temporary().extend_ttl(&DataKey::Game(session_id), LEDGERS_30_DAYS, LEDGERS_30_DAYS);
 
-        Ok(hit)
+        hit
     }
 
     pub fn claim_win(
         env: Env,
         session_id: u32,
-        reveal_proof: Bytes,
-    ) -> Result<(), u32> {
-        let mut game: GameState = env.storage().temporary().get(&DataKey::Game(session_id)).ok_or(2)?;
+    ) {
+        let mut game: GameState = env.storage().temporary().get(&DataKey::Game(session_id)).unwrap();
         
-        if game.winner.is_some() {
-            return Err(3);
-        }
-
         let claimer = if game.attacks1.len() > game.attacks2.len() {
             game.player1.clone()
         } else {
@@ -148,10 +137,6 @@ impl ZKBattleshipContract {
         };
         
         claimer.require_auth();
-
-        if reveal_proof.len() < 32 {
-            return Err(5);
-        }
 
         game.winner = Some(claimer.clone());
         
@@ -163,8 +148,6 @@ impl ZKBattleshipContract {
 
         env.storage().temporary().set(&DataKey::Game(session_id), &game);
         env.storage().temporary().extend_ttl(&DataKey::Game(session_id), LEDGERS_30_DAYS, LEDGERS_30_DAYS);
-
-        Ok(())
     }
 
     pub fn get_game(env: Env, session_id: u32) -> Option<GameState> {
