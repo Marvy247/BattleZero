@@ -155,19 +155,30 @@ export default function App() {
     setGenerating(true);
     toast.loading('Generating ZK proof...');
     try {
-      // Check if hit
-      const hit = myShips.some(ship => 
-        ship.positions.some(([r, c]) => r === row && c === col)
-      );
+      // Check if hit against opponent's ships (simulated)
+      const hit = Math.random() > 0.7; // 30% hit rate
       
-      // Generate proof
-      const flatShips: number[] = [];
+      // Generate proof with ship positions
+      const shipPositions: number[][] = [];
       myShips.forEach(ship => {
-        flatShips.push(ship.length);
-        ship.positions.forEach(([r, c]) => flatShips.push(r, c));
+        ship.positions.forEach(([r, c]) => shipPositions.push([r, c]));
       });
       
-      const proof = await generateAttackProof(myCommitment, flatShips, row, col, hit);
+      // Import proof generator
+      const { generateAttackProof, generateCommitment: genCommit } = await import('./utils/proofGenerator');
+      
+      // Generate commitment from ships
+      const commitment = await genCommit(shipPositions);
+      
+      // Generate proof
+      const proof = await generateAttackProof({
+        commitment,
+        ships: shipPositions,
+        attackRow: row,
+        attackCol: col,
+        isHit: hit,
+      });
+      
       toast.dismiss();
       
       if (hit) {
@@ -178,8 +189,8 @@ export default function App() {
         addLog('miss', `Missed at ${coord}. Shells hit water.`, 'you');
       }
       
-      // Submit to contract
-      // const result = await submitAttack(sessionId, wallet, row, col, proof);
+      // Submit to contract with proof
+      // const result = await submitAttack(sessionId, wallet, row, col, hit, proof);
       
       const newMyAttacks = [...myAttacks, [row, col, hit]];
       setMyAttacks(newMyAttacks);
@@ -188,7 +199,7 @@ export default function App() {
       
       // Check win condition immediately after our attack
       const totalHits = newMyAttacks.filter(a => a[2]).length;
-      const requiredHits = demoMode ? 3 : 17; // Only 3 hits needed in demo!
+      const requiredHits = demoMode ? 3 : 17;
       
       if (totalHits >= requiredHits) {
         setTimeout(() => {
@@ -203,7 +214,7 @@ export default function App() {
       setTimeout(() => {
         const oppRow = Math.floor(Math.random() * 10);
         const oppCol = Math.floor(Math.random() * 10);
-        const oppHit = demoMode ? Math.random() > 0.2 : Math.random() > 0.7; // 80% hit rate in demo
+        const oppHit = demoMode ? Math.random() > 0.2 : Math.random() > 0.7;
         const oppCoord = `${String.fromCharCode(65 + oppRow)}${oppCol + 1}`;
         
         if (oppHit) {
@@ -217,7 +228,7 @@ export default function App() {
         
         // Check if opponent won
         const oppHits = newOppAttacks.filter(a => a[2]).length;
-        const requiredHits = demoMode ? 3 : 17; // Only 3 hits needed in demo!
+        const requiredHits = demoMode ? 3 : 17;
         
         if (oppHits >= requiredHits) {
           setTimeout(() => {

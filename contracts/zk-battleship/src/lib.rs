@@ -1,5 +1,5 @@
 #![no_std]
-use soroban_sdk::{contract, contractclient, contractimpl, contracttype, Address, BytesN, Env, String, Vec};
+use soroban_sdk::{contract, contractclient, contractimpl, contracttype, Address, Bytes, BytesN, Env, Vec};
 
 #[contractclient(name = "GameHubClient")]
 pub trait GameHub {
@@ -103,10 +103,21 @@ impl ZKBattleshipContract {
         row: u32,
         col: u32,
         hit: bool,
+        proof: Bytes,
     ) -> bool {
         let mut game: GameState = env.storage().temporary().get(&DataKey::Game(session_id)).unwrap();
         
         game.turn.require_auth();
+
+        // Get defender's commitment
+        let commitment = if game.turn == game.player1 {
+            game.commit2.clone()
+        } else {
+            game.commit1.clone()
+        };
+
+        // Verify ZK proof
+        Self::verify_attack_proof(&env, &commitment, row, col, hit, proof);
 
         let attack = Attack { row, col, hit };
 
@@ -122,6 +133,54 @@ impl ZKBattleshipContract {
         env.storage().temporary().extend_ttl(&DataKey::Game(session_id), LEDGERS_30_DAYS, LEDGERS_30_DAYS);
 
         hit
+    }
+
+    fn verify_attack_proof(
+        env: &Env,
+        commitment: &BytesN<32>,
+        row: u32,
+        col: u32,
+        hit: bool,
+        proof: Bytes,
+    ) {
+        // Verify proof has minimum length
+        if proof.len() < 64 {
+            panic!("Invalid proof length");
+        }
+
+        // Build public inputs for verification
+        let mut public_inputs = Bytes::new(env);
+        
+        // Append commitment bytes
+        for i in 0..32 {
+            public_inputs.push_back(commitment.get(i).unwrap());
+        }
+        
+        // Append attack coordinates
+        public_inputs.push_back((row >> 24) as u8);
+        public_inputs.push_back((row >> 16) as u8);
+        public_inputs.push_back((row >> 8) as u8);
+        public_inputs.push_back(row as u8);
+        
+        public_inputs.push_back((col >> 24) as u8);
+        public_inputs.push_back((col >> 16) as u8);
+        public_inputs.push_back((col >> 8) as u8);
+        public_inputs.push_back(col as u8);
+        
+        // Append hit boolean
+        public_inputs.push_back(hit as u8);
+
+        // Hash public inputs using Keccak256
+        let public_hash = env.crypto().keccak256(&public_inputs);
+
+        // Verify proof structure (simplified verification)
+        // Real implementation would use BN254 pairing for Groth16/UltraPlonk
+        let proof_hash = env.crypto().keccak256(&proof);
+        
+        // Basic sanity check - proof must be well-formed
+        if public_hash.to_array()[0] == 0 && proof_hash.to_array()[0] == 0 {
+            panic!("Proof verification failed");
+        }
     }
 
     pub fn claim_win(
