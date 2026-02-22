@@ -231,8 +231,10 @@ export default function App() {
         ship.positions.forEach(([r, c]) => flatShips.push(r, c));
       });
       
+      toast.loading('Generating ZK proof...');
       const proof = await generateRevealProof(myCommitment, flatShips, myAttacks);
       
+      toast.loading('Submitting transaction... (check Freighter)');
       // Actually submit to contract
       const hash = await claimWin(sessionId, wallet, proof);
       setTxHash(hash);
@@ -261,8 +263,12 @@ export default function App() {
       
       addLog('victory', `Transaction: ${hash.slice(0, 20)}...`);
     } catch (err: any) {
-      setError(err.message);
-      toast.error(err.message);
+      toast.dismiss();
+      const errorMsg = err.message || String(err);
+      setError(errorMsg);
+      toast.error(`Failed: ${errorMsg}`, { duration: 5000 });
+      addLog('info', `Error claiming victory: ${errorMsg}`);
+      console.error('Claim win error:', err);
     } finally {
       setGenerating(false);
     }
