@@ -5,21 +5,22 @@
  * This calls the __constructor function to set up the contract
  */
 
-import * as StellarSdk from '@stellar/stellar-sdk';
+import pkg from '@stellar/stellar-sdk';
+const { Soroban, Keypair, TransactionBuilder, Networks, Contract, Address } = pkg;
 
 const CONTRACT_ID = 'CCVL2EVEX4M7QVD7PBYV5B4WRIUI6O563GXNEZU6XJOHDE5UIXPHHZUE';
 const GAME_HUB = 'CB4VZAT2U3UC6XFK3N23SKRF2NDCMP3QHJYMCHHFMZO7MRQO6DQ2EMYG';
-const ADMIN_SECRET = 'SBQFQNLKQXQXQXQXQXQXQXQXQXQXQXQXQXQXQXQXQXQXQXQXQXQXQXQX'; // Replace with actual secret
+const ADMIN_SECRET = 'SC4AYIIETDIWO3OLG5XQLBRSJJ3S4JTBRGT4FJ4YGRBHS7GX2PG4PBHI';
 const RPC_URL = 'https://soroban-testnet.stellar.org';
-const NETWORK_PASSPHRASE = StellarSdk.Networks.TESTNET;
+const NETWORK_PASSPHRASE = Networks.TESTNET;
 
 async function initializeContract() {
   console.log('🚀 Initializing ZK Battleship Contract');
   console.log('=====================================\n');
   
   try {
-    const server = new StellarSdk.SorobanRpc.Server(RPC_URL);
-    const sourceKeypair = StellarSdk.Keypair.fromSecret(ADMIN_SECRET);
+    const server = new Soroban.Server(RPC_URL);
+    const sourceKeypair = Keypair.fromSecret(ADMIN_SECRET);
     const sourceAccount = await server.getAccount(sourceKeypair.publicKey());
     
     console.log('📋 Configuration:');
@@ -27,18 +28,18 @@ async function initializeContract() {
     console.log(`   Admin: ${sourceKeypair.publicKey()}`);
     console.log(`   Game Hub: ${GAME_HUB}\n`);
     
-    const contract = new StellarSdk.Contract(CONTRACT_ID);
+    const contract = new Contract(CONTRACT_ID);
     
     console.log('🔧 Building transaction...');
-    const tx = new StellarSdk.TransactionBuilder(sourceAccount, {
+    const tx = new TransactionBuilder(sourceAccount, {
       fee: '100000',
       networkPassphrase: NETWORK_PASSPHRASE,
     })
       .addOperation(
         contract.call(
           '__constructor',
-          new StellarSdk.Address(sourceKeypair.publicKey()).toScVal(),
-          new StellarSdk.Address(GAME_HUB).toScVal()
+          new Address(sourceKeypair.publicKey()).toScVal(),
+          new Address(GAME_HUB).toScVal()
         )
       )
       .setTimeout(300)
@@ -65,7 +66,7 @@ async function initializeContract() {
       console.log('✅ Contract initialized successfully!\n');
       console.log('🔗 View on Explorer:');
       console.log(`   https://stellar.expert/explorer/testnet/tx/${result.hash}\n`);
-      console.log('✨ Ready for gameplay!');
+      console.log('✨ Ready for gameplay with real transactions!');
     } else {
       console.error('❌ Transaction failed:', response.status);
       if (response.resultXdr) {
