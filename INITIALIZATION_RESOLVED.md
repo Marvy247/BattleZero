@@ -13,7 +13,7 @@ The contract is **deployed and functional** on testnet. For the hackathon demo, 
 - ✅ All cryptography is REAL and functional
 
 ### 2. Smart Contract
-- ✅ Deployed on testnet: `CCVL2EVEX4M7QVD7PBYV5B4WRIUI6O563GXNEZU6XJOHDE5UIXPHHZUE`
+- ✅ Deployed on testnet: `CBW4GNMBKMDLT65QFSDVYZC2JA27YUICGPWXKMNWFX6NXV45SQD5GY6G`
 - ✅ All functions implemented correctly
 - ✅ Game Hub integration code complete
 - ✅ Responds to queries

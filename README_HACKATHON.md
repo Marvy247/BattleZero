@@ -93,7 +93,7 @@ Poseidon2 is a ZK-friendly hash function optimized for:
 
 ## 📦 Smart Contract Architecture
 
-### Contract: `CCVL2EVEX4M7QVD7PBYV5B4WRIUI6O563GXNEZU6XJOHDE5UIXPHHZUE`
+### Contract: `CBW4GNMBKMDLT65QFSDVYZC2JA27YUICGPWXKMNWFX6NXV45SQD5GY6G`
 
 **Game Hub Integration** (Required for hackathon):
 ```rust
@@ -208,7 +208,7 @@ npm run dev
 - [x] Core mechanic relies on ZK (not just demo)
 
 ### ✅ 2. Deployed On-Chain Component
-- [x] Contract deployed: `CCVL2EVEX4M7QVD7PBYV5B4WRIUI6O563GXNEZU6XJOHDE5UIXPHHZUE`
+- [x] Contract deployed: `CBW4GNMBKMDLT65QFSDVYZC2JA27YUICGPWXKMNWFX6NXV45SQD5GY6G`
 - [x] Calls `start_game()` on Game Hub
 - [x] Calls `end_game()` on Game Hub
 - [x] Game Hub: `CB4VZAT2U3UC6XFK3N23SKRF2NDCMP3QHJYMCHHFMZO7MRQO6DQ2EMYG`

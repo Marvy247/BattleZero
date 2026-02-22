@@ -11,7 +11,7 @@
 > "ZK Battleship - a fully functional naval warfare game using Zero-Knowledge proofs on Stellar testnet. Unlike traditional online Battleship that requires trusting a server, our implementation uses Poseidon2 commitments and Noir ZK circuits to enable provably fair gameplay with hidden information."
 
 **Show:**
-- Contract address: `CCVL2EVEX4M7QVD7PBYV5B4WRIUI6O563GXNEZU6XJOHDE5UIXPHHZUE`
+- Contract address: `CBW4GNMBKMDLT65QFSDVYZC2JA27YUICGPWXKMNWFX6NXV45SQD5GY6G`
 - Game Hub integration: `CB4VZAT2U3UC6XFK3N23SKRF2NDCMP3QHJYMCHHFMZO7MRQO6DQ2EMYG`
 - Scroll through contract functions
 
@@ -171,7 +171,7 @@
 ```
 ZK Battleship
 github.com/[your-repo]
-Contract: CCVL2EVEX4M7QVD7PBYV5B4WRIUI6O563GXNEZU6XJOHDE5UIXPHHZUE
+Contract: CBW4GNMBKMDLT65QFSDVYZC2JA27YUICGPWXKMNWFX6NXV45SQD5GY6G
 Built for Stellar Hacks: ZK Gaming
 ```
 

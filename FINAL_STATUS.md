@@ -9,7 +9,7 @@
 | # | Requirement | Status | Evidence |
 |---|------------|--------|----------|
 | 1 | **ZK-Powered Mechanic** | ✅ COMPLETE | Poseidon2 commitments + Noir proofs working |
-| 2 | **Deployed On-Chain** | ✅ COMPLETE | `CCVL2EVEX4M7QVD7PBYV5B4WRIUI6O563GXNEZU6XJOHDE5UIXPHHZUE` |
+| 2 | **Deployed On-Chain** | ✅ COMPLETE | `CBW4GNMBKMDLT65QFSDVYZC2JA27YUICGPWXKMNWFX6NXV45SQD5GY6G` |
 | 3 | **Game Hub Integration** | ✅ COMPLETE | Code calls start_game() and end_game() |
 | 4 | **Functional Frontend** | ✅ COMPLETE | Professional UI with all features |
 | 5 | **Open-Source Repo** | ✅ COMPLETE | 50+ commits, clean history |
@@ -76,7 +76,7 @@
 4. **`zk-battleship-frontend/src/App.tsx`** - Frontend integration
 
 ### Deployed Contracts:
-- **Your Contract**: `CCVL2EVEX4M7QVD7PBYV5B4WRIUI6O563GXNEZU6XJOHDE5UIXPHHZUE`
+- **Your Contract**: `CBW4GNMBKMDLT65QFSDVYZC2JA27YUICGPWXKMNWFX6NXV45SQD5GY6G`
 - **Game Hub**: `CB4VZAT2U3UC6XFK3N23SKRF2NDCMP3QHJYMCHHFMZO7MRQO6DQ2EMYG`
 
 ---
@@ -147,7 +147,7 @@ https://github.com/[your-username]/Stellar-Game-Studio
 
 **Contract Address**:
 ```
-CCVL2EVEX4M7QVD7PBYV5B4WRIUI6O563GXNEZU6XJOHDE5UIXPHHZUE
+CBW4GNMBKMDLT65QFSDVYZC2JA27YUICGPWXKMNWFX6NXV45SQD5GY6G
 ```
 
 **Game Hub Integration**:

@@ -4,7 +4,7 @@
 
 The ZK Battleship contract is **deployed** but the `__constructor` may not have been called yet.
 
-**Contract Address**: `CCVL2EVEX4M7QVD7PBYV5B4WRIUI6O563GXNEZU6XJOHDE5UIXPHHZUE`
+**Contract Address**: `CBW4GNMBKMDLT65QFSDVYZC2JA27YUICGPWXKMNWFX6NXV45SQD5GY6G`
 
 ## Why This Is OK for the Hackathon
 

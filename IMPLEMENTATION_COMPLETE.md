@@ -10,7 +10,7 @@
 - ✅ Client-side proof generation in browser
 
 ### 2. **Smart Contract with Game Hub Integration** ⭐⭐⭐⭐⭐
-- ✅ Deployed on testnet: `CCVL2EVEX4M7QVD7PBYV5B4WRIUI6O563GXNEZU6XJOHDE5UIXPHHZUE`
+- ✅ Deployed on testnet: `CBW4GNMBKMDLT65QFSDVYZC2JA27YUICGPWXKMNWFX6NXV45SQD5GY6G`
 - ✅ Calls `start_game()` on Game Hub
 - ✅ Calls `end_game()` on Game Hub  
 - ✅ Game Hub: `CB4VZAT2U3UC6XFK3N23SKRF2NDCMP3QHJYMCHHFMZO7MRQO6DQ2EMYG`
@@ -183,7 +183,7 @@ Based on:
 
 ### Must See:
 1. Demo video (to be recorded)
-2. Contract on Explorer: https://stellar.expert/explorer/testnet/contract/CCVL2EVEX4M7QVD7PBYV5B4WRIUI6O563GXNEZU6XJOHDE5UIXPHHZUE
+2. Contract on Explorer: https://stellar.expert/explorer/testnet/contract/CBW4GNMBKMDLT65QFSDVYZC2JA27YUICGPWXKMNWFX6NXV45SQD5GY6G
 3. Game Hub: https://stellar.expert/explorer/testnet/contract/CB4VZAT2U3UC6XFK3N23SKRF2NDCMP3QHJYMCHHFMZO7MRQO6DQ2EMYG
 
 ---

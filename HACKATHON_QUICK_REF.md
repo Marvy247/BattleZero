@@ -7,7 +7,7 @@
 | Requirement | Status | Evidence |
 |------------|--------|----------|
 | **ZK-Powered Mechanic** | ✅ COMPLETE | Poseidon2 commitments + Noir proofs |
-| **Deployed On-Chain** | ✅ COMPLETE | `CCVL2EVEX4M7QVD7PBYV5B4WRIUI6O563GXNEZU6XJOHDE5UIXPHHZUE` |
+| **Deployed On-Chain** | ✅ COMPLETE | `CBW4GNMBKMDLT65QFSDVYZC2JA27YUICGPWXKMNWFX6NXV45SQD5GY6G` |
 | **Game Hub Integration** | ✅ COMPLETE | Calls start_game() and end_game() |
 | **Functional Frontend** | ✅ COMPLETE | Polished UI with animations |
 | **Open-Source Repo** | ✅ COMPLETE | 40+ clean commits |
@@ -19,7 +19,7 @@
 
 ```
 Your Contract:
-CCVL2EVEX4M7QVD7PBYV5B4WRIUI6O563GXNEZU6XJOHDE5UIXPHHZUE
+CBW4GNMBKMDLT65QFSDVYZC2JA27YUICGPWXKMNWFX6NXV45SQD5GY6G
 
 Game Hub (Required):
 CB4VZAT2U3UC6XFK3N23SKRF2NDCMP3QHJYMCHHFMZO7MRQO6DQ2EMYG
@@ -87,7 +87,7 @@ http://localhost:3001
 - [ ] **GitHub URL**: [Your repo URL]
 - [ ] **Demo Video URL**: [YouTube/Vimeo link]
 - [ ] **Live Demo URL**: [Vercel/Netlify deployment]
-- [ ] **Contract Address**: `CCVL2EVEX4M7QVD7PBYV5B4WRIUI6O563GXNEZU6XJOHDE5UIXPHHZUE`
+- [ ] **Contract Address**: `CBW4GNMBKMDLT65QFSDVYZC2JA27YUICGPWXKMNWFX6NXV45SQD5GY6G`
 - [ ] **Description**: Copy from README_HACKATHON.md intro
 - [ ] **Category**: ZK Gaming
 - [ ] **Tags**: Zero-Knowledge, Stellar, Soroban, Noir, Poseidon2, Gaming
@@ -98,7 +98,7 @@ GitHub Repo:
 https://github.com/[your-username]/Stellar-Game-Studio
 
 Contract on Explorer:
-https://stellar.expert/explorer/testnet/contract/CCVL2EVEX4M7QVD7PBYV5B4WRIUI6O563GXNEZU6XJOHDE5UIXPHHZUE
+https://stellar.expert/explorer/testnet/contract/CBW4GNMBKMDLT65QFSDVYZC2JA27YUICGPWXKMNWFX6NXV45SQD5GY6G
 
 Game Hub Integration:
 https://stellar.expert/explorer/testnet/contract/CB4VZAT2U3UC6XFK3N23SKRF2NDCMP3QHJYMCHHFMZO7MRQO6DQ2EMYG
