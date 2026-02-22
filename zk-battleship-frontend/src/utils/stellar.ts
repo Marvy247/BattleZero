@@ -3,7 +3,7 @@ import { isConnected, getPublicKey, signTransaction } from '@stellar/freighter-a
 
 const RPC_URL = 'https://soroban-testnet.stellar.org';
 const NETWORK_PASSPHRASE = StellarSdk.Networks.TESTNET;
-export const CONTRACT_ID = 'CBW4GNMBKMDLT65QFSDVYZC2JA27YUICGPWXKMNWFX6NXV45SQD5GY6G';
+export const CONTRACT_ID = 'CCWJYIKVZTCXT4FYOWWWYNDSX6VWZ5BGAWKQBJYDAVRLTDVXW4HTFNNU';
 
 export async function connectWallet(): Promise<string> {
   const connected = await isConnected();
