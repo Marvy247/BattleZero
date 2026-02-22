@@ -321,6 +321,7 @@ export default function App() {
             marginTop: '80px',
           },
         }}
+        gutter={8}
       />
       {phase === 'won' && <Confetti width={width} height={height} />}
       {generating && <ProofSpinner />}
