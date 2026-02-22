@@ -164,9 +164,10 @@ if (missingWasm.length > 0) {
   process.exit(1);
 }
 
-// Create three testnet identities: admin, player1, player2
-// Admin signs deployments directly via secret key (no CLI identity required).
+// Create three testnet identities: deployer, player1, player2
+// Deployer signs deployments directly via secret key (no CLI identity required).
 // Player1 and player2 are keypairs for frontend dev use.
+// Admin can be set via USER_ADMIN_ADDRESS env var (for Freighter users)
 const walletAddresses: Record<string, string> = {};
 const walletSecrets: Record<string, string> = {};
 
@@ -208,18 +209,45 @@ for (const contract of allContracts) {
   if (envId) existingContractIds[contract.packageName] = envId;
 }
 
-// Handle admin identity (needs to be in Stellar CLI for deployment)
-console.log('Setting up admin identity...');
-console.log('📝 Generating new admin identity...');
-const adminKeypair = Keypair.random();
+// Check for user-provided admin address (e.g., from Freighter)
+const userAdminAddress = process.env.USER_ADMIN_ADDRESS;
+let adminAddress: string;
 
-walletAddresses.admin = adminKeypair.publicKey();
+if (userAdminAddress) {
+  // Validate the address format (basic check for G... format)
+  if (!userAdminAddress.startsWith('G') || userAdminAddress.length !== 56) {
+    console.error(`❌ Invalid admin address format: ${userAdminAddress}`);
+    console.error('Admin address must be a valid Stellar public key (56 characters starting with G)');
+    process.exit(1);
+  }
+  adminAddress = userAdminAddress;
+  console.log(`✅ Using provided admin address: ${adminAddress}`);
+} else {
+  // Generate admin keypair if not provided
+  console.log('📝 No USER_ADMIN_ADDRESS provided, generating new admin identity...');
+  const adminKeypair = Keypair.random();
+  adminAddress = adminKeypair.publicKey();
+  walletSecrets.admin = adminKeypair.secret();
+  console.log(`📝 Generated admin: ${adminAddress}`);
+}
+
+walletAddresses.admin = adminAddress;
+
+// Handle deployer identity (separate from admin - deployer pays for gas)
+console.log('Setting up deployer identity...');
+console.log('📝 Generating new deployer identity...');
+const deployerKeypair = Keypair.random();
+const deployerAddress = deployerKeypair.publicKey();
+const deployerSecret = deployerKeypair.secret();
+
+walletAddresses.deployer = deployerAddress;
+walletSecrets.deployer = deployerSecret;
 
 try {
-  await ensureTestnetFunded(walletAddresses.admin);
-  console.log('✅ admin funded');
+  await ensureTestnetFunded(deployerAddress);
+  console.log('✅ deployer funded');
 } catch (error) {
-  console.error('❌ Failed to ensure admin is funded. Deployment cannot proceed.');
+  console.error('❌ Failed to ensure deployer is funded. Deployment cannot proceed.');
   process.exit(1);
 }
 
@@ -250,16 +278,16 @@ for (const identity of ['player1', 'player2']) {
 }
 
 // Save to deployment.json and .env for setup script to use
-console.log("🔐 Player secret keys will be saved to .env (gitignored)\n");
+console.log("🔐 Deployer and player secret keys will be saved to .env (gitignored)\n");
 
 console.log("💼 Wallet addresses:");
-console.log(`  Admin:   ${walletAddresses.admin}`);
-console.log(`  Player1: ${walletAddresses.player1}`);
-console.log(`  Player2: ${walletAddresses.player2}\n`);
+console.log(`  Admin:    ${walletAddresses.admin} (contract owner)`);
+console.log(`  Deployer: ${walletAddresses.deployer} (pays for deployment)`);
+console.log(`  Player1:  ${walletAddresses.player1}`);
+console.log(`  Player2:  ${walletAddresses.player2}\n`);
 
-// Use admin secret for contract deployment
-const adminAddress = walletAddresses.admin;
-const adminSecret = adminKeypair.secret();
+// Use deployer secret for contract deployment (admin may not have secret key if from Freighter)
+// deployerAddress and deployerSecret are already declared above
 
 const deployed: Record<string, string> = { ...existingContractIds };
 
@@ -294,7 +322,7 @@ if (shouldEnsureMock) {
     console.log(`Deploying ${mock.packageName}...`);
     try {
       const result =
-        await $`${stellarCmd} contract deploy --wasm ${mock.wasmPath} --source-account ${adminSecret} --network ${NETWORK}`.text();
+        await $`${stellarCmd} contract deploy --wasm ${mock.wasmPath} --source-account ${deployerSecret} --network ${NETWORK}`.text();
       mockGameHubId = result.trim();
       deployed[mock.packageName] = mockGameHubId;
       console.log(`✅ ${mock.packageName} deployed: ${mockGameHubId}\n`);
@@ -312,13 +340,13 @@ for (const contract of contracts) {
     try {
       console.log("  Installing WASM...");
       const installResult =
-        await $`${stellarCmd} contract install --wasm ${contract.wasmPath} --source-account ${adminSecret} --network ${NETWORK}`.text();
+        await $`${stellarCmd} contract install --wasm ${contract.wasmPath} --source-account ${deployerSecret} --network ${NETWORK}`.text();
       const wasmHash = installResult.trim();
       console.log(`  WASM hash: ${wasmHash}`);
 
       console.log("  Deploying and initializing...");
       const deployResult =
-        await $`${stellarCmd} contract deploy --wasm-hash ${wasmHash} --source-account ${adminSecret} --network ${NETWORK} -- --admin ${adminAddress} --game-hub ${mockGameHubId}`.text();
+        await $`${stellarCmd} contract deploy --wasm-hash ${wasmHash} --source-account ${deployerSecret} --network ${NETWORK} -- --admin ${adminAddress} --game-hub ${mockGameHubId}`.text();
       const contractId = deployResult.trim();
       deployed[contract.packageName] = contractId;
       console.log(`✅ ${contract.packageName} deployed: ${contractId}\n`);
@@ -358,6 +386,7 @@ const deploymentInfo = {
   networkPassphrase: NETWORK_PASSPHRASE,
   wallets: {
     admin: walletAddresses.admin,
+    deployer: walletAddresses.deployer,
     player1: walletAddresses.player1,
     player2: walletAddresses.player2,
   },
@@ -381,10 +410,12 @@ ${contractEnvLines}
 
 # Dev wallet addresses for testing
 VITE_DEV_ADMIN_ADDRESS=${walletAddresses.admin}
+VITE_DEV_DEPLOYER_ADDRESS=${walletAddresses.deployer}
 VITE_DEV_PLAYER1_ADDRESS=${walletAddresses.player1}
 VITE_DEV_PLAYER2_ADDRESS=${walletAddresses.player2}
 
 # Dev wallet secret keys (WARNING: Never commit this file!)
+VITE_DEV_DEPLOYER_SECRET=${walletSecrets.deployer}
 VITE_DEV_PLAYER1_SECRET=${walletSecrets.player1}
 VITE_DEV_PLAYER2_SECRET=${walletSecrets.player2}
 `;

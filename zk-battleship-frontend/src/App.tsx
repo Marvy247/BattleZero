@@ -109,20 +109,41 @@ export default function App() {
     
     const commitment = await generateCommitment(flatShips);
     setMyCommitment(commitment);
-    setPhase('waiting');
-    toast.dismiss();
-    toast.success('Ships placed! Waiting for opponent...');
-    addLog('info', `Commitment generated: ${commitment.slice(0, 16)}...`, 'you');
-    addLog('info', 'Waiting for opponent to deploy fleet...');
     
-    // In production: wait for opponent, then call initializeGame
-    setTimeout(() => {
+    toast.dismiss();
+    toast.success('Commitment generated!');
+    addLog('info', `Commitment: ${commitment.slice(0, 16)}...`, 'you');
+    
+    // For demo: Initialize game on-chain with both players as same wallet
+    try {
+      toast.loading('Initializing game on-chain... (check Freighter)');
+      addLog('info', 'Submitting game initialization to blockchain...');
+      
+      const txHash = await initializeGame(
+        sessionId,
+        wallet,
+        wallet, // Demo: same wallet for both players
+        commitment,
+        commitment
+      );
+      
+      toast.dismiss();
+      toast.success('Game initialized on-chain!');
+      addLog('info', `✅ Game initialized! TX: ${txHash.slice(0, 20)}...`);
+      addLog('info', 'Game Hub notified via start_game()');
+      
       setPhase('playing');
-      toast.success('Game started!');
       addLog('info', demoMode 
         ? '⚡ Quick demo mode - First to 3 hits wins!' 
         : '⚔️ Battle commenced! You have first strike.', 'you');
-    }, demoMode ? 500 : 2000);
+    } catch (err: any) {
+      toast.dismiss();
+      toast.error(`Initialization failed: ${err.message}`);
+      addLog('info', `⚠️ Could not initialize on-chain: ${err.message}`);
+      // Continue anyway for demo
+      setPhase('playing');
+      addLog('info', '⚔️ Continuing in demo mode...', 'you');
+    }
   };
 
   const handleAttack = async (row: number, col: number) => {
@@ -223,20 +244,13 @@ export default function App() {
 
   const handleClaimWin = async () => {
     setGenerating(true);
-    toast.loading('Preparing victory claim...');
+    toast.loading('Claiming victory on-chain...');
     try {
       toast.loading('Submitting to blockchain... (check Freighter)');
+      addLog('info', 'Claiming victory and calling end_game()...');
       
-      // Make a REAL transaction: Initialize a demo game to show on-chain interaction
-      // This proves the contract is deployed and working
-      const demoCommitment = myCommitment || '0'.repeat(64);
-      const hash = await initializeGame(
-        sessionId,
-        wallet,
-        wallet, // Use same wallet for both players in demo
-        demoCommitment,
-        demoCommitment
-      );
+      // Call claim_win which internally calls game_hub.end_game()
+      const hash = await claimWin(sessionId, wallet);
       
       setTxHash(hash);
       
@@ -244,9 +258,9 @@ export default function App() {
       toast.success(
         (t) => (
           <div className="flex flex-col gap-2">
-            <div className="font-bold">🎉 Game Initialized On-Chain!</div>
+            <div className="font-bold">🎉 Victory Claimed On-Chain!</div>
             <div className="text-xs text-gray-500 mb-1">
-              Real transaction submitted to testnet
+              Game Hub notified via end_game()
             </div>
             <div className="text-xs text-gray-600 font-mono bg-gray-100 p-2 rounded break-all">
               {hash}
@@ -265,7 +279,8 @@ export default function App() {
         { duration: 15000 }
       );
       
-      addLog('victory', `Real transaction submitted: ${hash.slice(0, 20)}...`);
+      addLog('victory', `✅ Victory claimed! TX: ${hash.slice(0, 20)}...`);
+      addLog('victory', '🏆 Game Hub end_game() called successfully!');
     } catch (err: any) {
       toast.dismiss();
       const errorMsg = err.message || String(err);
