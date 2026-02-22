@@ -225,41 +225,47 @@ export default function App() {
     setGenerating(true);
     toast.loading('Preparing victory claim...');
     try {
-      // For demo: Since game isn't initialized in contract, show demo transaction
-      // In production with full 2-player game, this would call the real contract
+      toast.loading('Submitting to blockchain... (check Freighter)');
       
-      toast.loading('Generating proof of victory...');
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate proof generation
+      // Make a REAL transaction: Initialize a demo game to show on-chain interaction
+      // This proves the contract is deployed and working
+      const demoCommitment = myCommitment || '0'.repeat(64);
+      const hash = await initializeGame(
+        sessionId,
+        wallet,
+        wallet, // Use same wallet for both players in demo
+        demoCommitment,
+        demoCommitment
+      );
       
-      const hash = `${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
       setTxHash(hash);
       
       toast.dismiss();
       toast.success(
         (t) => (
           <div className="flex flex-col gap-2">
-            <div className="font-bold">🎉 Victory Claimed!</div>
+            <div className="font-bold">🎉 Game Initialized On-Chain!</div>
             <div className="text-xs text-gray-500 mb-1">
-              Demo Mode - Full game requires 2 players
+              Real transaction submitted to testnet
             </div>
-            <div className="text-xs text-gray-600 font-mono bg-gray-100 p-2 rounded">
-              TX: {hash}
+            <div className="text-xs text-gray-600 font-mono bg-gray-100 p-2 rounded break-all">
+              {hash}
             </div>
             <button
               onClick={() => {
                 toast.dismiss(t.id);
-                window.open(`https://stellar.expert/explorer/testnet/contract/${CONTRACT_ID}`, '_blank');
+                window.open(`https://stellar.expert/explorer/testnet/tx/${hash}`, '_blank');
               }}
               className="text-blue-600 hover:text-blue-800 underline text-sm text-left mt-2"
             >
-              View Contract on Explorer →
+              View Transaction on Explorer →
             </button>
           </div>
         ),
-        { duration: 12000 }
+        { duration: 15000 }
       );
       
-      addLog('victory', `Victory claimed! Contract: ${CONTRACT_ID.slice(0, 20)}...`);
+      addLog('victory', `Real transaction submitted: ${hash.slice(0, 20)}...`);
     } catch (err: any) {
       toast.dismiss();
       const errorMsg = err.message || String(err);
@@ -486,12 +492,12 @@ export default function App() {
             </button>
             {txHash && (
               <a
-                href={`https://stellar.expert/explorer/testnet/contract/${CONTRACT_ID}`}
+                href={`https://stellar.expert/explorer/testnet/tx/${txHash}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block text-center bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition w-full mb-2"
               >
-                View Contract on Explorer →
+                View Transaction on Explorer →
               </a>
             )}
             <button
