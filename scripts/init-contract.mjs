@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Initialize ZK Battleship Contract with Game Hub Address
+ * Initialize BattleZero Contract with Game Hub Address
  * This calls the __constructor function to set up the contract
  */
 
@@ -15,7 +15,7 @@ const RPC_URL = 'https://soroban-testnet.stellar.org';
 const NETWORK_PASSPHRASE = Networks.TESTNET;
 
 async function initializeContract() {
-  console.log('🚀 Initializing ZK Battleship Contract');
+  console.log('🚀 Initializing BattleZero Contract');
   console.log('=====================================\n');
   
   try {

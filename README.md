@@ -1,10 +1,10 @@
-# ZK Battleship - Zero-Knowledge Naval Warfare on Stellar
+# BattleZero - Zero-Knowledge Naval Warfare on Stellar
 
 A fully functional Battleship game implementation using Zero-Knowledge proofs for hidden information gameplay, deployed on Stellar testnet with cryptographic verification.
 
 ## Overview
 
-ZK Battleship demonstrates the practical application of Zero-Knowledge cryptography to solve the hidden information problem in online gaming. Players commit to ship positions using Poseidon2 hash functions, and prove attack outcomes without revealing their fleet configuration. All proofs are verified on-chain using Stellar's Protocol 25 cryptographic primitives.
+BattleZero demonstrates the practical application of Zero-Knowledge cryptography to solve the hidden information problem in online gaming. Players commit to ship positions using Poseidon2 hash functions, and prove attack outcomes without revealing their fleet configuration. All proofs are verified on-chain using Stellar's Protocol 25 cryptographic primitives.
 
 ## Architecture
 

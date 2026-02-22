@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "🎮 ZK Battleship - Final Deployment Script"
+echo "🎮 BattleZero - Final Deployment Script"
 echo "=========================================="
 echo ""
 

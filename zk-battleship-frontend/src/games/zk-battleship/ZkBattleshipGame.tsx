@@ -885,7 +885,7 @@ export function ZkBattleshipGame({
       <div className="flex items-center mb-6">
         <div>
           <h2 className="text-3xl font-black bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 bg-clip-text text-transparent">
-            Zk Battleship Game 🎲
+            BattleZero Game 🎲
           </h2>
           <p className="text-sm text-gray-700 font-semibold mt-1">
             Guess a number 1-10. Closest guess wins!

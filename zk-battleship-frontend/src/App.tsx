@@ -314,7 +314,14 @@ export default function App() {
   return (
     <div className="h-screen flex flex-col overflow-hidden relative">
       <OceanBackground />
-      <Toaster position="top-right" />
+      <Toaster 
+        position="top-right"
+        toastOptions={{
+          style: {
+            marginTop: '80px',
+          },
+        }}
+      />
       {phase === 'won' && <Confetti width={width} height={height} />}
       {generating && <ProofSpinner />}
       
@@ -326,7 +333,7 @@ export default function App() {
               <span className="text-4xl">⚓</span>
               <div>
                 <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-                  ZK Battleship
+                  BattleZero
                   {demoMode && (
                     <span className="text-sm bg-yellow-500 text-black px-2 py-1 rounded font-bold animate-pulse">
                       ⚡ DEMO MODE
@@ -411,7 +418,7 @@ export default function App() {
           >
             <div className="mb-6">
               <div className="text-6xl mb-4">⚓</div>
-              <h2 className="text-3xl font-bold text-gray-800 mb-2">ZK Battleship</h2>
+              <h2 className="text-3xl font-bold text-gray-800 mb-2">BattleZero</h2>
               <p className="text-gray-600">Privacy-preserving naval warfare on Stellar</p>
             </div>
             

@@ -1,4 +1,4 @@
-# Zk Battleship Game
+# BattleZero Game
 
 A simple two-player guessing game smart contract built on Stellar's Soroban platform.
 

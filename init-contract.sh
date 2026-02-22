@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "🚀 Initializing ZK Battleship Contract for Hackathon Demo"
+echo "🚀 Initializing BattleZero Contract for Hackathon Demo"
 echo "=========================================================="
 
 CONTRACT_ID="CBW4GNMBKMDLT65QFSDVYZC2JA27YUICGPWXKMNWFX6NXV45SQD5GY6G"
