@@ -146,8 +146,9 @@ export default function App() {
         : '⚔️ Battle commenced! You have first strike.', 'you');
     } catch (err: any) {
       toast.dismiss();
-      toast.error(`Initialization failed: ${err.message}`);
-      addLog('info', `⚠️ Could not initialize on-chain: ${err.message}`);
+      console.error('Initialization error:', err);
+      toast.error(`Initialization failed: ${err?.message || String(err)}`);
+      addLog('info', `⚠️ Could not initialize on-chain: ${err?.message || String(err)}`);
       // Continue anyway for demo
       setPhase('playing');
       addLog('info', '⚔️ Continuing in demo mode...', 'you');

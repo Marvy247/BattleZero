@@ -25,9 +25,16 @@ export async function initializeGame(
   
   const contract = new StellarSdk.Contract(CONTRACT_ID);
   
-  // Convert hex string to Uint8Array
-  const commit1Bytes = new Uint8Array(commit1.match(/.{1,2}/g)!.map(byte => parseInt(byte, 16))).slice(0, 32);
-  const commit2Bytes = new Uint8Array(commit2.match(/.{1,2}/g)!.map(byte => parseInt(byte, 16))).slice(0, 32);
+  // Convert commitment string to 32-byte array
+  const stringToBytes32 = (str: string): Uint8Array => {
+    const bytes = new Uint8Array(32);
+    const strBytes = new TextEncoder().encode(str.slice(0, 32));
+    bytes.set(strBytes);
+    return bytes;
+  };
+  
+  const commit1Bytes = stringToBytes32(commit1);
+  const commit2Bytes = stringToBytes32(commit2);
   
   const tx = new StellarSdk.TransactionBuilder(sourceAccount, {
     fee: '100000',
