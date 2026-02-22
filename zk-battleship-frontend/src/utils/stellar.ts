@@ -105,8 +105,7 @@ export async function submitAttack(
 
 export async function claimWin(
   sessionId: number,
-  player: string,
-  revealProof: Uint8Array
+  player: string
 ): Promise<string> {
   const server = new StellarSdk.SorobanRpc.Server(RPC_URL);
   const sourceAccount = await server.getAccount(player);
@@ -120,8 +119,7 @@ export async function claimWin(
     .addOperation(
       contract.call(
         'claim_win',
-        StellarSdk.nativeToScVal(sessionId, { type: 'u32' }),
-        StellarSdk.xdr.ScVal.scvBytes(revealProof)
+        StellarSdk.nativeToScVal(sessionId, { type: 'u32' })
       )
     )
     .setTimeout(300)

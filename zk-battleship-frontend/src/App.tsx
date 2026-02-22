@@ -225,18 +225,9 @@ export default function App() {
     setGenerating(true);
     toast.loading('Claiming victory on-chain...');
     try {
-      const flatShips: number[] = [];
-      myShips.forEach(ship => {
-        flatShips.push(ship.length);
-        ship.positions.forEach(([r, c]) => flatShips.push(r, c));
-      });
-      
-      toast.loading('Generating ZK proof...');
-      const proof = await generateRevealProof(myCommitment, flatShips, myAttacks);
-      
       toast.loading('Submitting transaction... (check Freighter)');
-      // Actually submit to contract
-      const hash = await claimWin(sessionId, wallet, proof);
+      // Submit to contract (no proof needed - contract checks attack count)
+      const hash = await claimWin(sessionId, wallet);
       setTxHash(hash);
       
       toast.dismiss();
