@@ -569,12 +569,21 @@ export default function App() {
                 </span>
               </div>
             </div>
-            <button
-              onClick={() => window.location.reload()}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition w-full"
-            >
-              Try Again
-            </button>
+            <div className="space-y-3">
+              <button
+                onClick={handleClaimWin}
+                disabled={generating}
+                className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition w-full disabled:opacity-50"
+              >
+                {generating ? 'Processing...' : 'Claim Victory (Demo)'}
+              </button>
+              <button
+                onClick={() => window.location.reload()}
+                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition w-full"
+              >
+                Try Again
+              </button>
+            </div>
           </motion.div>
         )}
         
