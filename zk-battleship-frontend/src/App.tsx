@@ -314,15 +314,7 @@ export default function App() {
   return (
     <div className="h-screen flex flex-col overflow-hidden relative">
       <OceanBackground />
-      <Toaster 
-        position="top-right"
-        toastOptions={{
-          style: {
-            marginTop: '80px',
-          },
-        }}
-        gutter={8}
-      />
+      <Toaster position="top-right" />
       {phase === 'won' && <Confetti width={width} height={height} />}
       {generating && <ProofSpinner />}
       
