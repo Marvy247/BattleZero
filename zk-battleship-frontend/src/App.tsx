@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Confetti from 'react-confetti';
 import { useWindowSize } from 'react-use';
 import { Toaster, toast } from 'react-hot-toast';
@@ -9,7 +9,7 @@ import ShipPlacement from './components/ShipPlacement';
 import BattleGrid from './components/BattleGrid';
 import ProofSpinner from './components/ProofSpinner';
 import BattleLog, { type LogEntry } from './components/BattleLog';
-import { connectWallet, initializeGame, submitAttack, claimWin, CONTRACT_ID } from './utils/stellar';
+import { initializeGame, claimWin } from './utils/stellar';
 import { initializeProver, generateCommitment, generateAttackProof } from './utils/noirProver';
 import type { Ship } from './types';
 
@@ -76,7 +76,7 @@ export default function App() {
       toast.loading('Requesting wallet access...');
       const accessObj = await requestAccess();
       
-      if (accessObj.error) {
+      if ((accessObj as any).error) {
         toast.dismiss();
         toast.error('Access denied. Please approve the connection in Freighter.');
         return;
@@ -199,7 +199,7 @@ export default function App() {
       // Submit to contract with proof
       // const result = await submitAttack(sessionId, wallet, row, col, hit, proof);
       
-      const newMyAttacks = [...myAttacks, [row, col, hit]];
+      const newMyAttacks: [number, number, boolean][] = [...myAttacks, [row, col, hit]];
       setMyAttacks(newMyAttacks);
       setIsMyTurn(false);
       addLog('info', 'Opponent preparing counter-attack...');
@@ -230,7 +230,7 @@ export default function App() {
           addLog('miss', `Enemy missed at ${oppCoord}.`, 'opponent');
         }
         
-        const newOppAttacks = [...oppAttacks, [oppRow, oppCol, oppHit]];
+        const newOppAttacks: [number, number, boolean][] = [...oppAttacks, [oppRow, oppCol, oppHit]];
         setOppAttacks(newOppAttacks);
         
         // Check if opponent won
@@ -247,7 +247,7 @@ export default function App() {
         }
         
         setIsMyTurn(true);
-        toast.info('Your turn!');
+        toast('Your turn!');
         addLog('info', 'Your turn to fire!', 'you');
       }, demoMode ? 1000 : 3000);
       
@@ -349,7 +349,7 @@ export default function App() {
                     </span>
                   </div>
                   
-                  {(phase === 'setup' || phase === 'placement') && (
+                  {(phase === 'setup') && (
                     <button
                       onClick={() => setDemoMode(!demoMode)}
                       className={`px-4 py-2 rounded-lg text-sm font-bold transition ${

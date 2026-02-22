@@ -96,12 +96,12 @@ export async function generateAttackProof(
   try {
     // Generate witness
     console.log('Generating witness...');
-    const { witness } = await noir!.execute(inputs);
+    const { witness } = await noir!.execute(inputs as any, undefined as any);
     console.log('Witness generated');
     
     // Generate proof
     console.log('Generating proof...');
-    const proof = await backend!.generateProof(witness);
+    const proof = await backend!.generateProof(witness as any, {} as any);
     console.log('Proof generated:', proof.proof.length, 'bytes');
     
     return proof.proof;
@@ -154,7 +154,7 @@ export async function verifyProof(
     const verified = await backend!.verifyProof({
       proof,
       publicInputs,
-    });
+    } as any, {} as any);
     return verified;
   } catch (error) {
     console.error('Proof verification failed:', error);

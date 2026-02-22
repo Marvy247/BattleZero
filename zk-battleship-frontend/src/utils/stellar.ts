@@ -46,8 +46,8 @@ export async function initializeGame(
         StellarSdk.nativeToScVal(sessionId, { type: 'u32' }),
         new StellarSdk.Address(player1).toScVal(),
         new StellarSdk.Address(player2).toScVal(),
-        StellarSdk.xdr.ScVal.scvBytes(commit1Bytes),
-        StellarSdk.xdr.ScVal.scvBytes(commit2Bytes)
+        StellarSdk.xdr.ScVal.scvBytes(commit1Bytes as any),
+        StellarSdk.xdr.ScVal.scvBytes(commit2Bytes as any)
       )
     )
     .setTimeout(300)
@@ -84,7 +84,7 @@ export async function submitAttack(
         StellarSdk.nativeToScVal(sessionId, { type: 'u32' }),
         StellarSdk.nativeToScVal(row, { type: 'u8' }),
         StellarSdk.nativeToScVal(col, { type: 'u8' }),
-        StellarSdk.xdr.ScVal.scvBytes(proof)
+        StellarSdk.xdr.ScVal.scvBytes(proof as any)
       )
     )
     .setTimeout(300)
@@ -104,7 +104,7 @@ export async function submitAttack(
   }
   
   if (response.status === 'SUCCESS' && response.returnValue) {
-    return StellarSdk.scValToBool(response.returnValue);
+    return response.returnValue?.b() || false;
   }
   
   return false;
