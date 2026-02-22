@@ -221,7 +221,7 @@ export default function App() {
       setTimeout(() => {
         const oppRow = Math.floor(Math.random() * 10);
         const oppCol = Math.floor(Math.random() * 10);
-        const oppHit = demoMode ? Math.random() > 0.2 : Math.random() > 0.7;
+        const oppHit = demoMode ? Math.random() > 0.8 : Math.random() > 0.7;
         const oppCoord = `${String.fromCharCode(65 + oppRow)}${oppCol + 1}`;
         
         if (oppHit) {
