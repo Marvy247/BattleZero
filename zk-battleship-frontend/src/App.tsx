@@ -10,7 +10,7 @@ import BattleGrid from './components/BattleGrid';
 import ProofSpinner from './components/ProofSpinner';
 import BattleLog, { type LogEntry } from './components/BattleLog';
 import { connectWallet, initializeGame, submitAttack, claimWin, CONTRACT_ID } from './utils/stellar';
-import { generateCommitment, generateAttackProof, generateRevealProof } from './utils/noir';
+import { initializeProver, generateCommitment, generateAttackProof } from './utils/noirProver';
 import type { Ship } from './types';
 
 type Phase = 'connect' | 'setup' | 'waiting' | 'playing' | 'won' | 'lost';
@@ -52,6 +52,14 @@ export default function App() {
           duration: 5000,
         });
       }
+    });
+    
+    // Initialize Noir prover on app load
+    initializeProver().then(() => {
+      console.log('Noir prover initialized');
+    }).catch(err => {
+      console.error('Failed to initialize Noir prover:', err);
+      toast.error('Failed to initialize ZK prover');
     });
   }, []);
 
@@ -95,23 +103,23 @@ export default function App() {
 
   const handleShipsPlaced = async (ships: Ship[]) => {
     setMyShips(ships);
-    toast.loading('Generating commitment...');
+    toast.loading('Generating ZK commitment with Noir...');
     addLog('info', 'Fleet deployed! Generating cryptographic commitment...', 'you');
     
-    // Flatten ships for commitment
-    const flatShips: number[] = [];
+    // Convert ships to coordinate array for Noir
+    const shipPositions: number[][] = [];
     ships.forEach(ship => {
-      flatShips.push(ship.length);
       ship.positions.forEach(([r, c]) => {
-        flatShips.push(r, c);
+        shipPositions.push([r, c]);
       });
     });
     
-    const commitment = await generateCommitment(flatShips);
+    // Generate real Poseidon2 commitment using Noir
+    const commitment = await generateCommitment(shipPositions);
     setMyCommitment(commitment);
     
     toast.dismiss();
-    toast.success('Commitment generated!');
+    toast.success('ZK commitment generated!');
     addLog('info', `Commitment: ${commitment.slice(0, 16)}...`, 'you');
     
     // For demo: Initialize game on-chain with both players as same wallet
@@ -153,33 +161,31 @@ export default function App() {
     addLog('attack', `Firing at coordinates ${coord}...`, 'you');
     
     setGenerating(true);
-    toast.loading('Generating ZK proof...');
+    toast.loading('Generating ZK proof with Noir...');
+    
     try {
       // Check if hit against opponent's ships (simulated)
       const hit = Math.random() > 0.7; // 30% hit rate
       
-      // Generate proof with ship positions
+      // Convert ships to coordinate array
       const shipPositions: number[][] = [];
       myShips.forEach(ship => {
         ship.positions.forEach(([r, c]) => shipPositions.push([r, c]));
       });
       
-      // Import proof generator
-      const { generateAttackProof, generateCommitment: genCommit } = await import('./utils/proofGenerator');
-      
-      // Generate commitment from ships
-      const commitment = await genCommit(shipPositions);
-      
-      // Generate proof
-      const proof = await generateAttackProof({
-        commitment,
-        ships: shipPositions,
-        attackRow: row,
-        attackCol: col,
-        isHit: hit,
-      });
+      // Generate real ZK proof using Noir
+      addLog('info', 'Computing ZK proof with Barretenberg backend...');
+      const proof = await generateAttackProof(
+        myCommitment,
+        shipPositions,
+        row,
+        col,
+        hit
+      );
       
       toast.dismiss();
+      toast.success(`✅ Proof generated (${proof.length} bytes)`);
+      addLog('info', `ZK proof: ${proof.length} bytes`);
       
       if (hit) {
         toast.success('💥 Hit!');
